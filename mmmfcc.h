@@ -2,6 +2,7 @@
 #define MMMFCC_H
 
 #include <QAudioDecoder>
+#include <QMediaPlayer>
 #include <QObject>
 
 #include "audiosourcefile.h"
@@ -14,11 +15,23 @@ public:
     ~MmMfcc();
 
     void setAudioFilePath(QString path);
+    int getPlayDuration();
+    int getPlayPositon();
+    void setPlayPosition(int position);
+    void MmMfcc::togglePlayPause();
 
 private:
     AudioSourceFile audioSourceFile;
+    QMediaPlayer player;
+    QString audioFilePath;
+
+    void notifyPositionChanged();
+
+signals:
+    void updatePosition();
 
 private slots:
+    void initPlayer();
     void test();
 
 };

@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QDataStream>
+#include <QUrl>
 
 AudioSourceFile::AudioSourceFile(QObject *parent) : QObject(parent)
 {
@@ -14,6 +15,10 @@ AudioSourceFile::AudioSourceFile(QObject *parent) : QObject(parent)
     format.setByteOrder(sampleEndian);
 
     decoder.setAudioFormat(format);
+
+    connect(&decoder,&QAudioDecoder::bufferReady, this, &AudioSourceFile::readDecodedAudioBuffer);
+    connect(&decoder, QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), this, &AudioSourceFile::notifyDecodeError);
+    connect(&decoder,&QAudioDecoder::finished, this, &AudioSourceFile::finalizeDecode);
 }
 
 void AudioSourceFile::startDecode(QString path)
@@ -25,9 +30,6 @@ void AudioSourceFile::startDecode(QString path)
     qDebug("decode start");
     qDebug() << decoder.duration();
     qDebug() << decoder.errorString();
-    connect(&decoder,&QAudioDecoder::bufferReady, this, &AudioSourceFile::readDecodedAudioBuffer);
-    connect(&decoder, QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), this, &AudioSourceFile::notifyDecodeError);
-    connect(&decoder,&QAudioDecoder::finished, this, &AudioSourceFile::finishDecode);
 }
 
 void AudioSourceFile::notifyDecodeError(QAudioDecoder::Error error){
@@ -47,11 +49,12 @@ void AudioSourceFile::readDecodedAudioBuffer(){
     qDebug() << decoder.errorString();
 }
 
-void AudioSourceFile::finishDecode()
+void AudioSourceFile::finalizeDecode()
 {
     qDebug() << "decode finish";
     qDebug() << decoder.duration();
     qDebug() << decoder.errorString();
+    /*
     QFile file(path + ".raw");
     if(file.open(QIODevice::WriteOnly)){
        for (int i = 0; i < rawSamples.size(); i++){
@@ -60,5 +63,6 @@ void AudioSourceFile::finishDecode()
        }
        file.close();
     }
+    */
     emit audioReady();
 }

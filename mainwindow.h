@@ -20,7 +20,16 @@ private:
     MmMfcc mmmfcc;
 
 private slots:
-    void on_pushButton_clicked();
+    void updateSeekbar();
+    void on_openAudioFile_clicked();
+
+    void on_playPauseButton_clicked();
+
+    void on_seekbarSlider_sliderReleased();
+
+    void on_seekBackButton_clicked();
+
+    void on_seekForwardButton_clicked();
 
 private:
     Ui::MainWindow *ui;

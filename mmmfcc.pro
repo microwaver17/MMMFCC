@@ -12,12 +12,14 @@ SOURCES += \
     audiosourcefile.cpp \
     main.cpp \
     mainwindow.cpp \
-    mmmfcc.cpp
+    mmmfcc.cpp \
+    translator.cpp
 
 HEADERS += \
     audiosourcefile.h \
     mainwindow.h \
-    mmmfcc.h
+    mmmfcc.h \
+    translator.h
 
 FORMS += \
     mainwindow.ui

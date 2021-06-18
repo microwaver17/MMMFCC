@@ -178,9 +178,12 @@
             </widget>
            </item>
            <item>
-            <widget class="QSlider" name="playPositionSlider">
+            <widget class="QSlider" name="seekbarSlider">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
+             </property>
+             <property name="maximum">
+              <number>999</number>
              </property>
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -188,7 +191,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButton">
+            <widget class="QPushButton" name="openAudioFile">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                <horstretch>0</horstretch>

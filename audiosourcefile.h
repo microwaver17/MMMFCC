@@ -30,7 +30,7 @@ signals:
 
 private slots:
     void readDecodedAudioBuffer();
-    void finishDecode();
+    void finalizeDecode();
     void notifyDecodeError(QAudioDecoder::Error error);
 
 };
