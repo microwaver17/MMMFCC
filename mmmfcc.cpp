@@ -1,18 +1,33 @@
 ﻿#include "mmmfcc.h"
+#include "translator.h"
+#include "consts.h"
 
 #include <QFile>
 #include <QtDebug>
+#include <QDateTime>
 
 MmMfcc::MmMfcc(QObject *parent) : QObject(parent)
+  , audioSourceFile(this)
+  , audioSourceDevice(this)
+  , translator(audioSourceFile, audioSourceDevice)
+  , isTranslating(false)
 {
-    player.setNotifyInterval(100);
+    qRegisterMetaType<QVector<double>>();
 
-    connect(&player, &QMediaPlayer::positionChanged, this, &MmMfcc::updatePosition);
-    connect(&audioSourceFile, &AudioSourceFile::audioReady, this, &MmMfcc::initPlayer);
+    translator.moveToThread(&translatorThread);
+    connect(&translatorTimer, &QTimer::timeout, this, &MmMfcc::dispatchTransrator);
+    connect(this, &MmMfcc::timeoutTranslator, &translator, &Translator::doTranslate);
+    connect(&translator, &Translator::updated, this, &MmMfcc::paintGraph);
+    connect(&audioSourceFile.getPlayer(), &QMediaPlayer::positionChanged, this, &MmMfcc::updatePosition);
+
+    translatorThread.start();
+    translatorTimer.start(1000.0 / Consts::fps);
 }
 
 MmMfcc::~MmMfcc()
 {
+    translatorThread.quit();
+    translatorThread.wait();
 }
 
 void MmMfcc::setAudioFilePath(QString path)
@@ -21,35 +36,37 @@ void MmMfcc::setAudioFilePath(QString path)
     audioSourceFile.startDecode(path);
 }
 
-void MmMfcc::initPlayer(){
-    player.setMedia(QUrl::fromLocalFile(audioFilePath));
-    player.play();
-}
-
-// プレイヤー操作
-int MmMfcc::getPlayDuration()
+QMediaPlayer &MmMfcc::getPlayer()
 {
-    return player.duration();
+    return audioSourceFile.getPlayer();
 }
 
-int MmMfcc::getPlayPositon(){
-    return player.position();
+Graph &MmMfcc::getMfccGraph()
+{
+    return mfccGraph;
 }
 
-void MmMfcc::setPlayPosition(int position){
-    player.setPosition(position);
+Translator &MmMfcc::getTranslator()
+{
+    return translator;
 }
 
-void MmMfcc::togglePlayPause(){
-    if (player.state() == QMediaPlayer::PlayingState){
-        player.pause();
-    }else{
-        player.play();
+void MmMfcc::dispatchTransrator()
+{
+    if (isTranslating){
+        return; //フレームスキップ
     }
+    emit timeoutTranslator();
+    isTranslating = true;
 }
 
-void MmMfcc::notifyPositionChanged(){
-    // emit updatePosition();
+void MmMfcc::paintGraph(QVector<double> data)
+{
+    isTranslating = false;
+    if (data.size() == 0){
+        return;
+    }
+    mfccGraph.paintCurrent(data);
 }
 
 void MmMfcc::test()

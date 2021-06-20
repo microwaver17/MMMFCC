@@ -4,8 +4,15 @@
 #include <QAudioDecoder>
 #include <QMediaPlayer>
 #include <QObject>
+#include <QThread>
+#include <QTimer>
 
 #include "audiosourcefile.h"
+#include "translator.h"
+#include "graph.h"
+#include "audiosourcedevice.h"
+
+Q_DECLARE_METATYPE(QVector<double>)
 
 class MmMfcc : public QObject
 {
@@ -15,23 +22,29 @@ public:
     ~MmMfcc();
 
     void setAudioFilePath(QString path);
-    int getPlayDuration();
-    int getPlayPositon();
-    void setPlayPosition(int position);
-    void MmMfcc::togglePlayPause();
+    void startTranslatorThread();
+
+    QMediaPlayer &getPlayer();
+    Graph &getMfccGraph();
+    Translator &getTranslator();
 
 private:
     AudioSourceFile audioSourceFile;
-    QMediaPlayer player;
+    AudioSourceDevice audioSourceDevice;
     QString audioFilePath;
-
-    void notifyPositionChanged();
+    Translator translator;
+    QThread translatorThread;
+    QTimer translatorTimer;
+    bool isTranslating;
+    Graph mfccGraph;
 
 signals:
     void updatePosition();
+    void timeoutTranslator();
 
 private slots:
-    void initPlayer();
+    void dispatchTransrator();
+    void paintGraph(QVector<double> data);
     void test();
 
 };

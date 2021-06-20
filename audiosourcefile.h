@@ -4,6 +4,7 @@
 #include <QAudioDecoder>
 #include <QAudioFormat>
 #include <QObject>
+#include <QMediaPlayer>
 
 class AudioSourceFile : public QObject
 {
@@ -11,18 +12,13 @@ class AudioSourceFile : public QObject
 public:
     explicit AudioSourceFile(QObject *parent = nullptr);
     void startDecode(QString path);
+    QVector<qint16> &getRawSamples();
+    QMediaPlayer &getPlayer();
 
 private:
-    // デコード形式
-    QString codec = "audio/pcm";
-    const int sampleRate = 44100;
-    const int channels = 1;
-    const int sampleSize = 16;
-    const QAudioFormat::SampleType sampleType = QAudioFormat::SampleType::SignedInt;
-    const QAudioFormat::Endian sampleEndian = QAudioFormat::Endian::LittleEndian;
-
     QString path;
     QAudioDecoder decoder;
+    QMediaPlayer player;
     QVector<qint16> rawSamples;
 
 signals:
@@ -32,6 +28,7 @@ private slots:
     void readDecodedAudioBuffer();
     void finalizeDecode();
     void notifyDecodeError(QAudioDecoder::Error error);
+    void playAgain();
 
 };
 

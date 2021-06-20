@@ -9,14 +9,22 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    audiosourcedevice.cpp \
     audiosourcefile.cpp \
+    compute-mfcc/mfcc.cc \
+    graph.cpp \
     main.cpp \
     mainwindow.cpp \
     mmmfcc.cpp \
     translator.cpp
 
 HEADERS += \
+    audiosourcedevice.h \
     audiosourcefile.h \
+    compute-mfcc/mfcc.h \
+    compute-mfcc/wavHeader.h \
+    consts.h \
+    graph.h \
     mainwindow.h \
     mmmfcc.h \
     translator.h

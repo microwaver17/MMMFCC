@@ -8,9 +8,15 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , mmmfcc(this)
+    , player(mmmfcc.getPlayer())
 {
     ui->setupUi(this);
 
+    Graph &graph = mmmfcc.getMfccGraph();
+    ui->graphGraphicsView->setScene(&graph.getScene());
+    graph.setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
+    graph.setMaxValue(6);
     connect(&mmmfcc, &MmMfcc::updatePosition, this, &MainWindow::updateSeekbar);
 }
 
@@ -19,8 +25,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    mmmfcc.getMfccGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
+}
+
 void MainWindow::updateSeekbar(){
-    int position = (float)mmmfcc.getPlayPositon() / mmmfcc.getPlayDuration() * ui->seekbarSlider->maximum();
+    int position = (float)player.position() / player.duration() * ui->seekbarSlider->maximum();
     ui->seekbarSlider->setValue(position);
 }
 
@@ -40,30 +52,72 @@ void MainWindow::on_openAudioFile_clicked()
     mmmfcc.setAudioFilePath(filepath);
 }
 
-
 void MainWindow::on_playPauseButton_clicked()
 {
-    mmmfcc.togglePlayPause();
+    QMediaPlayer &player = mmmfcc.getPlayer();
+    if (player.state() == QMediaPlayer::PlayingState){
+        player.pause();
+    }else{
+        player.play();
+    }
 }
-
 
 void MainWindow::on_seekbarSlider_sliderReleased()
 {
-    int position = (float)ui->seekbarSlider->value() / ui->seekbarSlider->maximum() * mmmfcc.getPlayDuration();
-    mmmfcc.setPlayPosition(position);
+    int position = (float)ui->seekbarSlider->value() / ui->seekbarSlider->maximum() * player.duration();
+    player.setPosition(position);
 }
 
+void MainWindow::on_seekbarSlider_sliderPressed()
+{
+    int position = (float)ui->seekbarSlider->value() / ui->seekbarSlider->maximum() * player.duration();
+    player.setPosition(position);
+}
 
 void MainWindow::on_seekBackButton_clicked()
 {
-    int position = mmmfcc.getPlayPositon() - 1000;
-    mmmfcc.setPlayPosition(position);
+    int position = player.position() - 100;
+    player.setPosition(position);
 }
 
 
 void MainWindow::on_seekForwardButton_clicked()
 {
-    int position = mmmfcc.getPlayPositon() + 1000;
-    mmmfcc.setPlayPosition(position);
+    int position = player.position() + 100;
+    player.setPosition(position);
+}
+
+
+void MainWindow::on_freeze1Button_clicked()
+{
+    mmmfcc.getMfccGraph().freeze1Graph();
+}
+
+void MainWindow::on_freeze2Button_clicked()
+{
+    mmmfcc.getMfccGraph().freeze2Graph();
+}
+
+void MainWindow::on_selectSourceMicButton_clicked()
+{
+    mmmfcc.getTranslator().setSource(Translator::Source::Device);
+}
+
+void MainWindow::on_selectSourceFileButton_clicked()
+{
+    mmmfcc.getTranslator().setSource(Translator::Source::File);
+}
+
+
+void MainWindow::on_toggleGraphButton_clicked()
+{
+    Graph &graph = mmmfcc.getMfccGraph();
+    graph.isHideCurrentGraph = (graph.isHideCurrentGraph == false);
+}
+
+
+void MainWindow::on_clearFreezeButton_clicked()
+{
+    mmmfcc.getMfccGraph().clearFreeze();
 }
 
