@@ -33,7 +33,7 @@ MmMfcc::~MmMfcc()
 void MmMfcc::setAudioFilePath(QString path)
 {
     audioFilePath = path;
-    audioSourceFile.startDecode(path);
+    audioSourceFile.setSource(path);
     translator.setSource(Translator::Source::File);
 }
 
