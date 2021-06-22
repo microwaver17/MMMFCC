@@ -29,13 +29,21 @@ void Graph::paintCurrent(QVector<double> &data)
 
 void Graph::freeze1Graph()
 {
-    freeze1 = current;
+    if (freeze1.size() == 0){
+        freeze1 = current;
+    }else{
+        freeze1.clear();
+    }
     paint();
 }
 
 void Graph::freeze2Graph()
 {
-    freeze2 = current;
+    if (freeze2.size() == 0){
+        freeze2 = current;
+    }else{
+        freeze2.clear();
+    }
     paint();
 }
 

@@ -24,18 +24,21 @@ AudioSourceDevice::AudioSourceDevice(QObject *parent) : QObject(parent)
     audioDevice = audioInput->start();
 }
 
-QVector<qint16> &AudioSourceDevice::getRawSamples()
+QVector<qint16> AudioSourceDevice::getRawSamples()
 {
+    QMutexLocker locker(&rawSamplesMutex);
     return rawSamples;
 }
 
 void AudioSourceDevice::readRawSamples()
 {
-    // MFCCのウィンドウ分の長さが溜まっているか
+    QMutexLocker locker(&rawSamplesMutex);
+
     QByteArray bytes = audioDevice->readAll();
-    if (bytes.size() == 0){
-        return;
-    }
+//    // MFCCのウィンドウ分の長さが溜まっているか
+//    if (bytes.size() == 0){
+//        return;
+//    }
 
     rawSamples.clear();
     for (int i = 0; i < bytes.size() / 2; i++){

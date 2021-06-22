@@ -19,6 +19,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
@@ -38,7 +39,7 @@ private slots:
     void on_selectSourceMicButton_clicked();
     void on_selectSourceFileButton_clicked();
     void on_toggleGraphButton_clicked();
-    void on_clearFreezeButton_clicked();
     void on_seekbarSlider_sliderPressed();
+    void on_seekTopButton_clicked();
 };
 #endif // MAINWINDOW_H

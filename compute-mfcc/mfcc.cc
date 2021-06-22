@@ -223,15 +223,15 @@ std::string MFCC::processFrame(int16_t* samples, size_t N) {
 }
 
 // svlpにより追加
-std::vector<double> MFCC::processFrameWithoutShift(std::vector<int16_t> &samples, size_t from){
+std::vector<double> MFCC::processFrameWithoutShift(std::vector<int16_t> &samples, size_t fromSamples){
     // サンプルが足りない時は空のvectorを返す
-    if (samples.size() <= from + winLengthSamples){
+    if (samples.size() <= fromSamples + winLengthSamples){
         return std::vector<double>();
     }
 
     frame.clear();
     for (int i = 0; i < winLengthSamples; i++){
-        frame.push_back(samples.at(from + i));
+        frame.push_back(samples.at(fromSamples + i));
     }
 
     preEmphHam();

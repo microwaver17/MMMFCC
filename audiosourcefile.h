@@ -5,6 +5,7 @@
 #include <QAudioFormat>
 #include <QObject>
 #include <QMediaPlayer>
+#include <QMutex>
 
 class AudioSourceFile : public QObject
 {
@@ -12,7 +13,7 @@ class AudioSourceFile : public QObject
 public:
     explicit AudioSourceFile(QObject *parent = nullptr);
     void startDecode(QString path);
-    QVector<qint16> &getRawSamples();
+    QVector<qint16> getRawSamples(size_t from);
     QMediaPlayer &getPlayer();
 
 private:
@@ -20,6 +21,7 @@ private:
     QAudioDecoder decoder;
     QMediaPlayer player;
     QVector<qint16> rawSamples;
+    QMutex rawSampleMutex;
 
 signals:
     void audioReady();

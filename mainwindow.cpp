@@ -31,6 +31,24 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     mmmfcc.getMfccGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    QMainWindow::keyPressEvent(event);
+
+    int key = event->key();
+    Qt::KeyboardModifiers modif = event->modifiers();
+
+    if (key == Qt::Key::Key_0 && modif == Qt::KeyboardModifier::KeypadModifier){
+        on_playPauseButton_clicked();
+    }else if(key == Qt::Key_Home){
+        on_seekTopButton_clicked();
+    }else if(key == Qt::Key_Minus && modif == Qt::KeyboardModifier::KeypadModifier){
+        on_seekBackButton_clicked();
+    }else if(key == Qt::Key_Plus && modif == Qt::KeyboardModifier::KeypadModifier){
+        on_seekForwardButton_clicked();
+    }
+}
+
 void MainWindow::updateSeekbar(){
     int position = (float)player.position() / player.duration() * ui->seekbarSlider->maximum();
     ui->seekbarSlider->setValue(position);
@@ -54,7 +72,6 @@ void MainWindow::on_openAudioFile_clicked()
 
 void MainWindow::on_playPauseButton_clicked()
 {
-    QMediaPlayer &player = mmmfcc.getPlayer();
     if (player.state() == QMediaPlayer::PlayingState){
         player.pause();
     }else{
@@ -76,15 +93,21 @@ void MainWindow::on_seekbarSlider_sliderPressed()
 
 void MainWindow::on_seekBackButton_clicked()
 {
-    int position = player.position() - 100;
+    int position = player.position() - 1000;
     player.setPosition(position);
 }
 
 
 void MainWindow::on_seekForwardButton_clicked()
 {
-    int position = player.position() + 100;
+    int position = player.position() + 1000;
     player.setPosition(position);
+}
+
+
+void MainWindow::on_seekTopButton_clicked()
+{
+    player.setPosition(0);
 }
 
 
@@ -115,9 +138,4 @@ void MainWindow::on_toggleGraphButton_clicked()
     graph.isHideCurrentGraph = (graph.isHideCurrentGraph == false);
 }
 
-
-void MainWindow::on_clearFreezeButton_clicked()
-{
-    mmmfcc.getMfccGraph().clearFreeze();
-}
 

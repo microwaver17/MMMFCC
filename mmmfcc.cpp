@@ -34,6 +34,7 @@ void MmMfcc::setAudioFilePath(QString path)
 {
     audioFilePath = path;
     audioSourceFile.startDecode(path);
+    translator.setSource(Translator::Source::File);
 }
 
 QMediaPlayer &MmMfcc::getPlayer()

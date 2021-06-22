@@ -24,9 +24,10 @@ AudioSourceFile::AudioSourceFile(QObject *parent) : QObject(parent)
     connect(&player, &QMediaPlayer::stateChanged, this, &AudioSourceFile::playAgain);
 }
 
-QVector<qint16> &AudioSourceFile::getRawSamples()
+QVector<qint16> AudioSourceFile::getRawSamples(size_t fromSamples)
 {
-    return rawSamples;
+    QMutexLocker locker(&rawSampleMutex);
+    return rawSamples.mid(fromSamples, Consts::windowLength * Consts::sampleRate);
 }
 
 QMediaPlayer &AudioSourceFile::getPlayer()
@@ -38,6 +39,7 @@ void AudioSourceFile::startDecode(QString path)
 {
     this->path = path;
     rawSamples.clear();
+    player.setMedia(QUrl::fromLocalFile(path));
     decoder.setSourceFilename(path);
     decoder.start();
 //    qDebug("decode start");
@@ -59,10 +61,17 @@ void AudioSourceFile::playAgain()
 }
 
 void AudioSourceFile::readDecodedAudioBuffer(){
+    QMutexLocker locker(&rawSampleMutex);
+
     QAudioBuffer buffer = decoder.read();
     const qint16 *data = buffer.constData<qint16>();
     for (int i = 0; i < buffer.sampleCount(); i++){
         rawSamples.append(data[i]);
+    }
+
+    // デコードしたバッファが溜まったら再生
+    if ((player.state() != QMediaPlayer::PlayingState) && (rawSamples.size() > (Consts::windowLength / 1000.0) * Consts::sampleRate * 2)){
+        player.play();
     }
 //    qDebug() << "decode buffer";
 //    qDebug() << decoder.duration();
@@ -71,8 +80,6 @@ void AudioSourceFile::readDecodedAudioBuffer(){
 
 void AudioSourceFile::finalizeDecode()
 {
-    player.setMedia(QUrl::fromLocalFile(path));
-    player.play();
 //    qDebug() << "decode finish";
 //    qDebug() << decoder.duration();
 //    qDebug() << decoder.errorString();
