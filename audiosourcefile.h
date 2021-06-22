@@ -18,7 +18,6 @@ public:
     QMediaPlayer &getPlayer();
 
 private:
-    QString path;
     QMediaPlayer player;
     bool bufferReady;
 

@@ -18,13 +18,10 @@ protected:
     QMutex rawSamplesMutex;
     QAudioDecoder decoder;
     QAudioFormat format;
-
-    void startDecode();
-
-private:
     QIODevice *device;
     QString path;
 
+    void startDecode();
 
 protected slots:
     void readDecodedAudioBuffer();

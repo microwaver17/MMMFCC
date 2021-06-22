@@ -29,6 +29,7 @@ private:
 
 private slots:
     void updateSeekbar();
+    void updateLog();
     void on_openAudioFile_clicked();
     void on_playPauseButton_clicked();
     void on_seekbarSlider_sliderReleased();

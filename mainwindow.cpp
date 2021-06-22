@@ -1,9 +1,11 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "log.h"
 
 #include <QAudioDeviceInfo>
 #include <QFileDialog>
 #include <QtDebug>
+#include <QScrollBar>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,7 +19,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->graphGraphicsView->setScene(&graph.getScene());
     graph.setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
     graph.setMaxValue(6);
+
+    connect(&Log::getInstance(), &Log::logAdded, this, &MainWindow::updateLog);
     connect(&mmmfcc, &MmMfcc::updatePosition, this, &MainWindow::updateSeekbar);
+
+    updateLog();
 }
 
 MainWindow::~MainWindow()
@@ -54,10 +60,25 @@ void MainWindow::updateSeekbar(){
     ui->seekbarSlider->setValue(position);
 }
 
-void MainWindow::on_openAudioFile_clicked()
+void MainWindow::updateLog()
 {
+    auto logs = Log::getInstance().getLogs();
+    QString logtext = "";
+    for (int i = 0; i < logs.size(); i++){
+        auto log = logs.at(i);
+        logtext += log["message"] + " (" + log["class"] + ")";
+        if (i != logs.size() - 1){
+            logtext += '\n';
+        }
+    }
+    ui->logTextArea->setPlainText(logtext);
+    int max = ui->logTextArea->verticalScrollBar()->maximum();
+    ui->logTextArea->verticalScrollBar()->setValue(max);
+    qDebug() << "Log updated";
+}
 
-    QString filepath = QFileDialog::getOpenFileName(
+void MainWindow::on_openAudioFile_clicked()
+{    QString filepath = QFileDialog::getOpenFileName(
                 this,
                 u8"音声ファイルを選択してください",
                 u8"C:\\Users\\yuya\\Documents\\devel\\mmmfcc\\test_compute-mfcc",

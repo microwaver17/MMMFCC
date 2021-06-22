@@ -1,6 +1,7 @@
 ﻿#include "mmmfcc.h"
 #include "translator.h"
 #include "consts.h"
+#include "log.h"
 
 #include <QFile>
 #include <QtDebug>
@@ -25,6 +26,7 @@ MmMfcc::MmMfcc(QObject *parent) : QObject(parent)
 
     translatorThread.start();
     translatorTimer.start(1000.0 / Consts::fps);
+    Log::getInstance().addLog(u8"スレッド開始", this);
 }
 
 MmMfcc::~MmMfcc()

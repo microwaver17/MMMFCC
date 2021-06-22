@@ -1,4 +1,5 @@
 ﻿#include "audiosourcefile.h"
+#include "log.h"
 
 #include <QFile>
 #include <QDataStream>
@@ -26,11 +27,13 @@ void AudioSourceFile::playAgain()
 
 void AudioSourceFile::setSource(QString path)
 {
+    Log::getInstance().addLog(u8"オープン " + path, this);
     bufferReady = false;
 
     player.setMedia(QUrl::fromLocalFile(path));
     player.play();
 
-    decoder.setSourceFilename(path);
+    this->path = path;
+    qDebug() << path;
     startDecode();
 }
