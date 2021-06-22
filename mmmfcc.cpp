@@ -14,6 +14,9 @@ MmMfcc::MmMfcc(QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<QVector<double>>();
 
+    QAudioDeviceInfo info;
+    audioSourceDevice.setSource(info);
+
     translator.moveToThread(&translatorThread);
     connect(&translatorTimer, &QTimer::timeout, this, &MmMfcc::dispatchTransrator);
     connect(this, &MmMfcc::timeoutTranslator, &translator, &Translator::doTranslate);

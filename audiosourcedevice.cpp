@@ -1,36 +1,42 @@
 ﻿#include "audiosourcedevice.h"
 #include "consts.h"
+
 #include <QAudioFormat>
 #include <QAudioDeviceInfo>
 #include <QtDebug>
 #include <QFile>
 
-AudioSourceDevice::AudioSourceDevice(QObject *parent) : QObject(parent)
+AudioSourceDevice::AudioSourceDevice(QObject *parent) : AbstractAudioSource(parent)
+  , audioInput(nullptr)
 {
-    QAudioFormat format;
-    format.setCodec(Consts::codec);
-    format.setSampleRate(Consts::sampleRate);
-    format.setChannelCount(Consts::channels);
-    format.setSampleSize(Consts::sampleSize);
-    format.setSampleType(Consts::sampleType);
-    format.setByteOrder(Consts::sampleEndian);
+}
 
-    QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
+AudioSourceDevice::~AudioSourceDevice()
+{
+    delete audioInput;
+}
+
+void AudioSourceDevice::setSource(QAudioDeviceInfo info)
+{
+    info = QAudioDeviceInfo::defaultInputDevice();
+    if (!info.isFormatSupported(format)){
+        QAudioFormat new_format = info.nearestFormat(format);
+        if (new_format.channelCount() != 1 || new_format.sampleSize() != Consts::sampleSize){
+            qDebug() << "unsupported format";
+            return;
+        }
+    }
     qDebug() << info.deviceName();
+
+    delete audioInput;
     audioInput = new QAudioInput(info, format, this);
-    audioInput->setNotifyInterval(Consts::windowLength);
-    connect(audioInput, &QAudioInput::notify, this, &AudioSourceDevice::readRawSamples);
-
+    audioInput->setNotifyInterval(Consts::windowLength * 1.5);
     audioDevice = audioInput->start();
+    connect(audioInput, &QAudioInput::notify, this, &AudioSourceDevice::readAudioBuffer);
 }
 
-QVector<qint16> AudioSourceDevice::getRawSamples()
-{
-    QMutexLocker locker(&rawSamplesMutex);
-    return rawSamples;
-}
 
-void AudioSourceDevice::readRawSamples()
+void AudioSourceDevice::readAudioBuffer()
 {
     QMutexLocker locker(&rawSamplesMutex);
 
@@ -48,6 +54,7 @@ void AudioSourceDevice::readRawSamples()
         qint16 val = *(qint16*)buf;
         rawSamples.append(val);
     }
+
     /*
     QFile file("test.raw");
     if(file.open(QIODevice::WriteOnly | QIODevice::Append)){
@@ -58,4 +65,6 @@ void AudioSourceDevice::readRawSamples()
        file.close();
     }
     */
+
 }
+

@@ -3,7 +3,6 @@
 
 AbstractAudioSource::AbstractAudioSource(QObject *parent) : QObject(parent)
 {
-    QAudioFormat format;
     format.setCodec(Consts::codec);
     format.setSampleRate(Consts::sampleRate);
     format.setChannelCount(Consts::channels);
@@ -19,9 +18,9 @@ AbstractAudioSource::AbstractAudioSource(QObject *parent) : QObject(parent)
     connect(&decoder,&QAudioDecoder::finished, this, &AbstractAudioSource::finalizeDecode);
 }
 
-QVector<qint16> AbstractAudioSource::getRawSamples(size_t fromSamples)
+QVector<qint16> AbstractAudioSource::getRawSamples(int fromSamples)
 {
-    QMutexLocker locker(&rawSampleMutex);
+    QMutexLocker locker(&rawSamplesMutex);
     return rawSamples.mid(fromSamples, Consts::windowLength * Consts::sampleRate);
 }
 
@@ -38,7 +37,7 @@ void AbstractAudioSource::notifyDecodeError(QAudioDecoder::Error error){
 }
 
 void AbstractAudioSource::readDecodedAudioBuffer(){
-    QMutexLocker locker(&rawSampleMutex);
+    QMutexLocker locker(&rawSamplesMutex);
 
     QAudioBuffer buffer = decoder.read();
     const qint16 *data = buffer.constData<qint16>();

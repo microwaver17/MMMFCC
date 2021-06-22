@@ -26,9 +26,11 @@ void AudioSourceFile::playAgain()
 
 void AudioSourceFile::setSource(QString path)
 {
-    decoder.setSourceFilename(path);
+    bufferReady = false;
+
     player.setMedia(QUrl::fromLocalFile(path));
     player.play();
+
+    decoder.setSourceFilename(path);
     startDecode();
-    bufferReady = false;
 }

@@ -32,9 +32,9 @@ void Translator::doTranslate()
 {
         QVector<qint16> rawSamples;
         if (currentSource == Source::Device){
-            rawSamples = audioSourceDevice.getRawSamples();
+            rawSamples = audioSourceDevice.getRawSamples(0);
         }else if (currentSource == Source::File){
-            size_t from = audioSourceFile.getPlayer().position() / 1000.0 * Consts::sampleRate;
+            int from = audioSourceFile.getPlayer().position() / 1000.0 * Consts::sampleRate;
             rawSamples = audioSourceFile.getRawSamples(from);
         }
         // qDebug() << mfcc;

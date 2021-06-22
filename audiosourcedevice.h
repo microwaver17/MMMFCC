@@ -1,32 +1,27 @@
 ﻿#ifndef AUDIOSOURCEDEVICE_H
 #define AUDIOSOURCEDEVICE_H
 
+#include "abstractaudiosource.h"
+
 #include <QObject>
 #include <QAudioInput>
 #include <QVector>
 #include <QMutex>
 
-class AudioSourceDevice : public QObject
+class AudioSourceDevice : public AbstractAudioSource
 {
     Q_OBJECT
 public:
     explicit AudioSourceDevice(QObject *parent = nullptr);
-    QVector<qint16> getRawSamples();
+    ~AudioSourceDevice();
+    void setSource(QAudioDeviceInfo info);
 
 private:
     QAudioInput *audioInput;
     QIODevice *audioDevice;
-    QVector<qint16> rawSamples;
-    QMutex rawSamplesMutex;
-
-signals:
-    void audioReady();
 
 private slots:
-    void readRawSamples();
-
-signals:
-
+    void readAudioBuffer();
 };
 
 #endif // AUDIOSOURCEDEVICE_H
