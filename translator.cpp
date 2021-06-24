@@ -6,7 +6,7 @@
 #include <QThread>
 
 Translator::Translator(AudioSourceFile &asf, AudioSourceDevice &asd, QObject *parent) : QObject(parent)
-  , mfccTranslator(new MFCC(Settings::getInstance().sampleRate, 12 * 2, Settings::getInstance().windowLength, 10, 40, 50, 6500))
+  , mfccTranslator(new MFCC(Settings::getInstance().sampleRate, 12 * 2, Settings::getInstance().windowLength, 10, 24, 50, 6500))
   , audioSourceFile(asf)
   , audioSourceDevice(asd)
   , currentSource(Source::Device)

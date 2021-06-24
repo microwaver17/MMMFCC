@@ -37,7 +37,7 @@ void AudioSourceDevice::setSource(QAudioDeviceInfo info)
     audioDevice = audioInput->start();
     connect(audioInput, &QAudioInput::notify, this, &AudioSourceDevice::readAudioBuffer);
 
-    Log::getInstance().addLog(u8"オープン " + info.deviceName(), this);
+    Log::getInstance().addLog(u8"オープン（デバイス） " + info.deviceName(), this);
 }
 
 

@@ -73,5 +73,5 @@ void MmMfcc::paintGraph(QVector<double> data)
     if (data.size() == 0){
         return;
     }
-    graph.paintCurrent(data);
+    graph.plotData(data);
 }

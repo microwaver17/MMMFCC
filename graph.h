@@ -11,20 +11,26 @@ public:
     explicit Graph(QObject *parent = nullptr);
     QGraphicsScene &getScene();
 
+    enum class GraphType{
+        Line,
+        Bar
+    };
+
     void setSceneSize(int width, int height);
     void setScale(double scale);
-    void paintCurrent(QVector<double> &data);
+    void plotData(QVector<double> data);
     void freeze1Graph();
     void freeze2Graph();
     void clearFreeze();
     bool isHideCurrentGraph;
     bool isAutoScele;
+    GraphType graphType;
 
 private:
     int width;
     int height;
-    const int x_margin = 10;
-    const int y_margin = 10;
+    const int x_margin = 20;
+    const int y_margin = 20;
     double scale;   // 縦軸の最大値
     QVector<double> current;
     QVector<double> freeze1;

@@ -199,3 +199,15 @@ void MainWindow::on_autoScalecheckBox_stateChanged(int state)
     }
 }
 
+
+void MainWindow::on_graphTypeLineButton_clicked()
+{
+    mmmfcc.getGraph().graphType = Graph::GraphType::Line;
+}
+
+
+void MainWindow::on_graphTypeBarButton_clicked()
+{
+    mmmfcc.getGraph().graphType = Graph::GraphType::Bar;
+}
+

@@ -45,5 +45,7 @@ private slots:
     void on_inputDeviceComboBox_currentIndexChanged(int index);
     void on_graphScalelSlider_valueChanged(int value);
     void on_autoScalecheckBox_stateChanged(int state);
+    void on_graphTypeLineButton_clicked();
+    void on_graphTypeBarButton_clicked();
 };
 #endif // MAINWINDOW_H

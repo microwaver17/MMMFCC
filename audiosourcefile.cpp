@@ -27,7 +27,7 @@ void AudioSourceFile::playAgain()
 
 void AudioSourceFile::setSource(QString path)
 {
-    Log::getInstance().addLog(u8"オープン " + path, this);
+    Log::getInstance().addLog(u8"オープン（ファイル） " + path, this);
     bufferReady = false;
 
     player.setMedia(QUrl::fromLocalFile(path));

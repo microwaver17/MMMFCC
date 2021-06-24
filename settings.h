@@ -23,6 +23,7 @@ public:
     const double scale_multiple = 100;
     const double default_scale = 0.35;
     const bool isAutoScale = true;
+    const int lineSize = 2;
 
 private:
     Settings();
