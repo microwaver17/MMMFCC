@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
-    <height>803</height>
+    <width>1199</width>
+    <height>810</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>1100</width>
+    <width>1140</width>
     <height>0</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1100</width>
+    <width>16777215</width>
     <height>16777215</height>
    </size>
   </property>
@@ -37,7 +37,7 @@
      <enum>QLayout::SetDefaultConstraint</enum>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="graphLayout" stretch="1,0,0">
+     <layout class="QHBoxLayout" name="graphLayout" stretch="0,0,0,0,0">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -70,6 +70,56 @@
        </widget>
       </item>
       <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Preferred</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <property name="sizeConstraint">
+         <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="bottomMargin">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QSlider" name="graphScalelSlider">
+            <property name="maximum">
+             <number>999</number>
+            </property>
+            <property name="pageStep">
+             <number>100</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="autoScalecheckBox">
+          <property name="text">
+           <string>Auto</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -79,7 +129,7 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>10</width>
+          <width>40</width>
           <height>20</height>
          </size>
         </property>
@@ -221,7 +271,7 @@
         <item>
          <widget class="QPushButton" name="toggleGraphButton">
           <property name="text">
-           <string>Start/Stop</string>
+           <string>Hide / Show</string>
           </property>
          </widget>
         </item>
@@ -275,6 +325,9 @@
     <item>
      <layout class="QHBoxLayout" name="audioControlWidget">
       <property name="spacing">
+       <number>6</number>
+      </property>
+      <property name="topMargin">
        <number>6</number>
       </property>
       <item>
@@ -450,7 +503,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>200</width>
+             <width>300</width>
              <height>0</height>
             </size>
            </property>
@@ -485,17 +538,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1100</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>

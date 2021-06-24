@@ -1,6 +1,7 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "log.h"
+#include "settings.h"
 
 #include <QAudioDeviceInfo>
 #include <QFileDialog>
@@ -11,19 +12,26 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , mmmfcc(this)
-    , player(mmmfcc.getPlayer())
 {
     ui->setupUi(this);
 
-    Graph &graph = mmmfcc.getMfccGraph();
+    Settings &stgs = Settings::getInstance();
+
+    Graph &graph = mmmfcc.getGraph();
     ui->graphGraphicsView->setScene(&graph.getScene());
     graph.setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
-    graph.setMaxValue(6);
+    ui->graphScalelSlider->setValue(stgs.default_scale * 1000);
+    ui->autoScalecheckBox->setChecked(stgs.isAutoScale);
 
     connect(&Log::getInstance(), &Log::logAdded, this, &MainWindow::updateLog);
-    connect(&mmmfcc, &MmMfcc::updatePosition, this, &MainWindow::updateSeekbar);
+    connect(&mmmfcc.getPlayer(), &QMediaPlayer::positionChanged, this, &MainWindow::updateSeekbar);
 
     updateLog();
+
+    devicesInfo = QAudioDeviceInfo::availableDevices(QAudio::Mode::AudioInput);
+    for (int i = 0; i < devicesInfo.size(); i++){
+        ui->inputDeviceComboBox->addItem(devicesInfo.at(i).deviceName());
+    }
 }
 
 MainWindow::~MainWindow()
@@ -34,7 +42,7 @@ MainWindow::~MainWindow()
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
-    mmmfcc.getMfccGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
+    mmmfcc.getGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -56,6 +64,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 }
 
 void MainWindow::updateSeekbar(){
+    QMediaPlayer &player = mmmfcc.getPlayer();
     int position = (float)player.position() / player.duration() * ui->seekbarSlider->maximum();
     ui->seekbarSlider->setValue(position);
 }
@@ -93,6 +102,7 @@ void MainWindow::on_openAudioFile_clicked()
 
 void MainWindow::on_playPauseButton_clicked()
 {
+    QMediaPlayer &player = mmmfcc.getPlayer();
     if (player.state() == QMediaPlayer::PlayingState){
         player.pause();
     }else{
@@ -102,44 +112,50 @@ void MainWindow::on_playPauseButton_clicked()
 
 void MainWindow::on_seekbarSlider_sliderReleased()
 {
+    QMediaPlayer &player = mmmfcc.getPlayer();
     int position = (float)ui->seekbarSlider->value() / ui->seekbarSlider->maximum() * player.duration();
     player.setPosition(position);
 }
 
 void MainWindow::on_seekbarSlider_sliderPressed()
 {
+    QMediaPlayer &player = mmmfcc.getPlayer();
     int position = (float)ui->seekbarSlider->value() / ui->seekbarSlider->maximum() * player.duration();
     player.setPosition(position);
 }
 
 void MainWindow::on_seekBackButton_clicked()
 {
-    int position = player.position() - 1000;
+    QMediaPlayer &player = mmmfcc.getPlayer();
+    int position = player.position() - 100;
+    player.pause();
     player.setPosition(position);
 }
 
 
 void MainWindow::on_seekForwardButton_clicked()
 {
-    int position = player.position() + 1000;
+    QMediaPlayer &player = mmmfcc.getPlayer();
+    int position = player.position() + 100;
+    player.pause();
     player.setPosition(position);
 }
 
 
 void MainWindow::on_seekTopButton_clicked()
 {
-    player.setPosition(0);
+    mmmfcc.getPlayer().setPosition(0);
 }
 
 
 void MainWindow::on_freeze1Button_clicked()
 {
-    mmmfcc.getMfccGraph().freeze1Graph();
+    mmmfcc.getGraph().freeze1Graph();
 }
 
 void MainWindow::on_freeze2Button_clicked()
 {
-    mmmfcc.getMfccGraph().freeze2Graph();
+    mmmfcc.getGraph().freeze2Graph();
 }
 
 void MainWindow::on_selectSourceMicButton_clicked()
@@ -155,8 +171,31 @@ void MainWindow::on_selectSourceFileButton_clicked()
 
 void MainWindow::on_toggleGraphButton_clicked()
 {
-    Graph &graph = mmmfcc.getMfccGraph();
+    Graph &graph = mmmfcc.getGraph();
     graph.isHideCurrentGraph = (graph.isHideCurrentGraph == false);
 }
 
+
+void MainWindow::on_inputDeviceComboBox_currentIndexChanged(int index)
+{
+    QAudioDeviceInfo info = devicesInfo.at(index);
+    mmmfcc.setAudioDevice(info);
+}
+
+
+void MainWindow::on_graphScalelSlider_valueChanged(int value)
+{
+    double scale = value / 1000.0;
+    mmmfcc.getGraph().setScale(scale);
+}
+
+
+void MainWindow::on_autoScalecheckBox_stateChanged(int state)
+{
+    if (state == Qt::CheckState::Checked){
+        mmmfcc.getGraph().isAutoScele = true;
+    }else{
+        mmmfcc.getGraph().isAutoScele = false;
+    }
+}
 

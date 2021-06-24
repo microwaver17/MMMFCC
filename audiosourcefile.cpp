@@ -4,7 +4,7 @@
 #include <QFile>
 #include <QDataStream>
 #include <QUrl>
-#include "consts.h"
+#include "settings.h"
 
 AudioSourceFile::AudioSourceFile(QObject *parent) : AbstractAudioSource(parent)
   , bufferReady(false)

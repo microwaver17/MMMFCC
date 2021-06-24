@@ -1,12 +1,12 @@
 ﻿#include "translator.h"
-#include "consts.h"
+#include "settings.h"
 
 #include <QVector>
 #include <QDateTime>
 #include <QThread>
 
 Translator::Translator(AudioSourceFile &asf, AudioSourceDevice &asd, QObject *parent) : QObject(parent)
-  , mfccTranslator(new MFCC(Consts::sampleRate, 12 * 3, Consts::windowLength, 10, 40, 50, 6500))
+  , mfccTranslator(new MFCC(Settings::getInstance().sampleRate, 12 * 2, Settings::getInstance().windowLength, 10, 40, 50, 6500))
   , audioSourceFile(asf)
   , audioSourceDevice(asd)
   , currentSource(Source::Device)
@@ -34,7 +34,7 @@ void Translator::doTranslate()
         if (currentSource == Source::Device){
             rawSamples = audioSourceDevice.getRawSamples(0);
         }else if (currentSource == Source::File){
-            int from = audioSourceFile.getPlayer().position() / 1000.0 * Consts::sampleRate;
+            int from = audioSourceFile.getPlayer().position() / 1000.0 * Settings::getInstance().sampleRate;
             rawSamples = audioSourceFile.getRawSamples(from);
         }
         // qDebug() << mfcc;

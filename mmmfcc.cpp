@@ -1,6 +1,6 @@
 ﻿#include "mmmfcc.h"
 #include "translator.h"
-#include "consts.h"
+#include "settings.h"
 #include "log.h"
 
 #include <QFile>
@@ -15,17 +15,13 @@ MmMfcc::MmMfcc(QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<QVector<double>>();
 
-    QAudioDeviceInfo info;
-    audioSourceDevice.setSource(info);
-
     translator.moveToThread(&translatorThread);
     connect(&translatorTimer, &QTimer::timeout, this, &MmMfcc::dispatchTransrator);
     connect(this, &MmMfcc::timeoutTranslator, &translator, &Translator::doTranslate);
     connect(&translator, &Translator::updated, this, &MmMfcc::paintGraph);
-    connect(&audioSourceFile.getPlayer(), &QMediaPlayer::positionChanged, this, &MmMfcc::updatePosition);
 
     translatorThread.start();
-    translatorTimer.start(1000.0 / Consts::fps);
+    translatorTimer.start(1000.0 / Settings::getInstance().fps);
     Log::getInstance().addLog(u8"スレッド開始", this);
 }
 
@@ -37,9 +33,14 @@ MmMfcc::~MmMfcc()
 
 void MmMfcc::setAudioFilePath(QString path)
 {
-    audioFilePath = path;
     audioSourceFile.setSource(path);
     translator.setSource(Translator::Source::File);
+}
+
+void MmMfcc::setAudioDevice(QAudioDeviceInfo info)
+{
+    audioSourceDevice.setSource(info);
+    translator.setSource(Translator::Source::Device);
 }
 
 QMediaPlayer &MmMfcc::getPlayer()
@@ -47,9 +48,9 @@ QMediaPlayer &MmMfcc::getPlayer()
     return audioSourceFile.getPlayer();
 }
 
-Graph &MmMfcc::getMfccGraph()
+Graph &MmMfcc::getGraph()
 {
-    return mfccGraph;
+    return graph;
 }
 
 Translator &MmMfcc::getTranslator()
@@ -72,10 +73,5 @@ void MmMfcc::paintGraph(QVector<double> data)
     if (data.size() == 0){
         return;
     }
-    mfccGraph.paintCurrent(data);
-}
-
-void MmMfcc::test()
-{
-
+    graph.paintCurrent(data);
 }

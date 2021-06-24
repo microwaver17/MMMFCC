@@ -22,30 +22,28 @@ public:
     ~MmMfcc();
 
     void setAudioFilePath(QString path);
+    void setAudioDevice(QAudioDeviceInfo info);
     void startTranslatorThread();
 
     QMediaPlayer &getPlayer();
-    Graph &getMfccGraph();
+    Graph &getGraph();
     Translator &getTranslator();
 
 private:
     AudioSourceFile audioSourceFile;
     AudioSourceDevice audioSourceDevice;
-    QString audioFilePath;
     Translator translator;
     QThread translatorThread;
     QTimer translatorTimer;
     bool isTranslating;
-    Graph mfccGraph;
+    Graph graph;
 
 signals:
-    void updatePosition();
     void timeoutTranslator();
 
 private slots:
     void dispatchTransrator();
     void paintGraph(QVector<double> data);
-    void test();
 
 };
 

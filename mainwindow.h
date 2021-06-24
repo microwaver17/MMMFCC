@@ -25,7 +25,7 @@ private:
     Ui::MainWindow *ui;
 
     MmMfcc mmmfcc;
-    QMediaPlayer &player;
+    QList<QAudioDeviceInfo> devicesInfo;
 
 private slots:
     void updateSeekbar();
@@ -42,5 +42,8 @@ private slots:
     void on_toggleGraphButton_clicked();
     void on_seekbarSlider_sliderPressed();
     void on_seekTopButton_clicked();
+    void on_inputDeviceComboBox_currentIndexChanged(int index);
+    void on_graphScalelSlider_valueChanged(int value);
+    void on_autoScalecheckBox_stateChanged(int state);
 };
 #endif // MAINWINDOW_H

@@ -1,18 +1,19 @@
 ﻿#include "abstractaudiosource.h"
-#include "consts.h"
+#include "settings.h"
 #include "log.h"
 
 AbstractAudioSource::AbstractAudioSource(QObject *parent) : QObject(parent)
 {
-    format.setCodec(Consts::codec);
-    format.setSampleRate(Consts::sampleRate);
-    format.setChannelCount(Consts::channels);
-    format.setSampleSize(Consts::sampleSize);
-    format.setSampleType(Consts::sampleType);
-    format.setByteOrder(Consts::sampleEndian);
+    Settings &stgs = Settings::getInstance();
+    format.setCodec(stgs.codec);
+    format.setSampleRate(stgs.sampleRate);
+    format.setChannelCount(stgs.channels);
+    format.setSampleSize(stgs.sampleSize);
+    format.setSampleType(stgs.sampleType);
+    format.setByteOrder(stgs.sampleEndian);
 
     decoder.setAudioFormat(format);
-    decoder.setNotifyInterval(Consts::windowLength * 1.5);
+    decoder.setNotifyInterval(stgs.windowLength);
 
     connect(&decoder,&QAudioDecoder::bufferReady, this, &AbstractAudioSource::readDecodedAudioBuffer);
     connect(&decoder, QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), this, &AbstractAudioSource::notifyDecodeError);
@@ -25,7 +26,9 @@ QVector<qint16> AbstractAudioSource::getRawSamples(int fromSamples)
     if (fromSamples > rawSamples.size()){
         return QVector<qint16>();
     }
-    return rawSamples.mid(fromSamples, Consts::windowLength * Consts::sampleRate);
+
+    Settings &stgs = Settings::getInstance();
+    return rawSamples.mid(fromSamples, stgs.windowLength * stgs.sampleRate);
 }
 
 void AbstractAudioSource::startDecode()

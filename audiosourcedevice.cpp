@@ -1,5 +1,5 @@
 ﻿#include "audiosourcedevice.h"
-#include "consts.h"
+#include "settings.h"
 #include "log.h"
 
 #include <QAudioFormat>
@@ -19,20 +19,21 @@ AudioSourceDevice::~AudioSourceDevice()
 
 void AudioSourceDevice::setSource(QAudioDeviceInfo info)
 {
-    info = QAudioDeviceInfo::defaultInputDevice();
     if (!info.isFormatSupported(format)){
-        QAudioFormat new_format = info.nearestFormat(format);
+//        QAudioFormat new_format = info.nearestFormat(format);
 
-        if (new_format.channelCount() != 1 || new_format.sampleSize() != Consts::sampleSize){
-            Log::getInstance().addLog(u8"フォーマットが未対応", this);
-            return;
-        }
+//        if (new_format.channelCount() != 1 || new_format.sampleSize() != Consts::sampleSize){
+//            Log::getInstance().addLog(u8"フォーマットが未対応", this);
+//            return;
+//        }
+        Log::getInstance().addLog(u8"未対応のフォーマット（デバイス） " + info.deviceName(), this);
+        return;
     }
     qDebug() << info.deviceName();
 
     delete audioInput;
     audioInput = new QAudioInput(info, format, this);
-    audioInput->setNotifyInterval(Consts::windowLength * 1.5);
+    audioInput->setNotifyInterval(Settings::getInstance().windowLength);
     audioDevice = audioInput->start();
     connect(audioInput, &QAudioInput::notify, this, &AudioSourceDevice::readAudioBuffer);
 

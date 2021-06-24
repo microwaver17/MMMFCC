@@ -13,6 +13,7 @@ SOURCES += \
     audiosourcedevice.cpp \
     audiosourcefile.cpp \
     compute-mfcc/mfcc.cc \
+    compute-mfcc/settings.cpp \
     graph.cpp \
     log.cpp \
     main.cpp \
@@ -26,11 +27,11 @@ HEADERS += \
     audiosourcefile.h \
     compute-mfcc/mfcc.h \
     compute-mfcc/wavHeader.h \
-    consts.h \
     graph.h \
     log.h \
     mainwindow.h \
     mmmfcc.h \
+    settings.h \
     translator.h
 
 FORMS += \
