@@ -22,7 +22,7 @@ QVector<double> Translator::translate(QVector<qint16> &samples, quint64 fromSamp
 {
     std::vector<qint16> samples_vec = samples.toStdVector();
 
-    std::vector<double> mfcc = mfccTranslator->processFrameWithoutShift(samples_vec, fromSamples);
+    std::vector<double> mfcc = mfccTranslator->processFrame(samples_vec, fromSamples);
 
     QVector<double> mfcc_qvec = QVector<double>::fromStdVector(mfcc);
     return mfcc_qvec;

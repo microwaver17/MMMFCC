@@ -13,12 +13,12 @@ SOURCES += \
     audiosourcedevice.cpp \
     audiosourcefile.cpp \
     compute-mfcc/mfcc.cc \
-    compute-mfcc/settings.cpp \
     graph.cpp \
     log.cpp \
     main.cpp \
     mainwindow.cpp \
     mmmfcc.cpp \
+    settings.cpp \
     translator.cpp
 
 HEADERS += \
@@ -26,7 +26,6 @@ HEADERS += \
     audiosourcedevice.h \
     audiosourcefile.h \
     compute-mfcc/mfcc.h \
-    compute-mfcc/wavHeader.h \
     graph.h \
     log.h \
     mainwindow.h \
