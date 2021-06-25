@@ -15,6 +15,7 @@ public:
         Line,
         Bar
     };
+    Q_ENUM(GraphType)
 
     void setSceneSize(int width, int height);
     void setScale(double scale);
@@ -22,10 +23,13 @@ public:
     void freeze1Graph();
     void freeze2Graph();
     void clearFreeze();
-    bool isHideCurrentGraph;
-    bool isAutoScele;
-    bool isMovingAvarage;
-    GraphType graphType;
+
+    void setIsHideCurrentGraph(bool newIsHideCurrentGraph);
+    void setIsAutoScele(bool newIsAutoScele);
+    void setIsMovingAvarage(bool newIsMovingAvarage);
+    void setGraphType(GraphType newGraphType);
+
+    bool getIsHideCurrentGraph() const;
 
 private:
     int width;
@@ -40,9 +44,17 @@ private:
     QVector<QVector<double>> currentHistory;
     int movavg_cursor;
 
-    void addMovingAverage(QVector<double> const &data);
+    // 設定
+    bool isHideCurrentGraph;
+    bool isAutoScele;
+    bool isMovingAvarage;
+    GraphType graphType;
+
+    void addCurrentHistory(QVector<double> const &data);
+    QVector<double> calcMovingAverage();
     void paintGrid(int n, QPen pen);
     void paintLabel(int n, QFont font);
+    void paintError(double err, int idx, QBrush brush, QFont font);
     void paintLine(QVector<double> const &data, QPen pen);
     void paintBar(QVector<double> const &data, QBrush brush);
     void paint();

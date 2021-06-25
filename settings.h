@@ -12,27 +12,30 @@ public:
     static Settings &getInstance();
 
     // デコード形式
-    const char codec[64] = "audio/pcm";
-    const int sampleRate = 48000;
-    const int channels = 1;
-    const int sampleSize = 16;
-    const int windowLength = 25;
-    const QAudioFormat::SampleType sampleType = QAudioFormat::SampleType::SignedInt;
-    const QAudioFormat::Endian sampleEndian = QAudioFormat::Endian::LittleEndian;
+    char codec[64] = "audio/pcm";
+    int sampleRate = 48000;
+    int channels = 1;
+    int sampleSize = 16;
+    QAudioFormat::SampleType sampleType = QAudioFormat::SampleType::SignedInt;
+    QAudioFormat::Endian sampleEndian = QAudioFormat::Endian::LittleEndian;
+
     QAudioFormat getFormat();
 
+    // MFCC
+    int windowLength = 25;
+    int cepstramNumber = 12;
+
     // 画面表示系
-    const int fps = 30;
-    const double scale_multiple = 100;
-    const double default_scale = 0.35;
-    const bool isAutoScale = true;
-    const int lineSize = 2;
-    const int movingAverageSize = fps / 2;
-    const int defaultGraphSizeX = 1000;
-    const int defaultGraphSizeY = 800;
+    int fps = 30;
+    double scale_multiple = 100;
+    double default_scale = 0.35;
+    bool isAutoScale = true;
+    int movingAverageSize = fps / 5;
 
 private:
     Settings();
+    void save();
+    void load();
 
 };
 #endif // SETTINGS_H

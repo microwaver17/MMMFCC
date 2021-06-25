@@ -1,12 +1,15 @@
 ﻿#include "translator.h"
 #include "settings.h"
+#include "log.h"
+#include "util.h"
 
 #include <QVector>
 #include <QDateTime>
 #include <QThread>
+#include <QVariant>
 
 Translator::Translator(AudioSourceFile &asf, AudioSourceDevice &asd, QObject *parent) : QObject(parent)
-  , mfccTranslator(new MFCC(SETTINGS.sampleRate, 12 * 2, SETTINGS.windowLength, 10, 24, 50, 6500))
+  , mfccTranslator(new MFCC(SETTINGS.sampleRate, SETTINGS.cepstramNumber, SETTINGS.windowLength, 10, 24, 50, 6500))
   , audioSourceFile(asf)
   , audioSourceDevice(asd)
   , currentSource(Source::Device)
@@ -48,5 +51,7 @@ void Translator::doTranslate()
 
 void Translator::setSource(Source source)
 {
+    QString source_str = Util::toStrEnum<Source>(source);
+    LOG.addLog(u8"音声ソースを変更 " + source_str);
     currentSource = source;
 }

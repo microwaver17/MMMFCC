@@ -19,6 +19,9 @@ public:
         File,
         Device
     };
+    Q_ENUM(Source)
+
+    void setSource(Source source);
 
 private:
     MFCC *mfccTranslator;
@@ -30,7 +33,6 @@ private:
 
 public slots:
     void doTranslate();
-    void setSource(Source source);
 
 signals:
     void updated(QVector<double> mfcc);

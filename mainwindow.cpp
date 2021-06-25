@@ -51,13 +51,13 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     int key = event->key();
     Qt::KeyboardModifiers modif = event->modifiers();
 
-    if (key == Qt::Key::Key_0 && modif == Qt::KeyboardModifier::KeypadModifier){
+    if (key == Qt::Key::Key_0){
         on_playPauseButton_clicked();
     }else if(key == Qt::Key_Home){
         on_seekTopButton_clicked();
-    }else if(key == Qt::Key_Minus && modif == Qt::KeyboardModifier::KeypadModifier){
+    }else if(key == Qt::Key_Minus){
         on_seekBackButton_clicked();
-    }else if(key == Qt::Key_Plus && modif == Qt::KeyboardModifier::KeypadModifier){
+    }else if(key == Qt::Key_Plus){
         on_seekForwardButton_clicked();
     }
 }
@@ -82,7 +82,6 @@ void MainWindow::updateLog()
     ui->logTextArea->setPlainText(logtext);
     int max = ui->logTextArea->verticalScrollBar()->maximum();
     ui->logTextArea->verticalScrollBar()->setValue(max);
-    qDebug() << "Log updated";
 }
 
 void MainWindow::on_openAudioFile_clicked()
@@ -109,14 +108,13 @@ void MainWindow::on_playPauseButton_clicked()
     }
 }
 
-void MainWindow::on_seekbarSlider_sliderReleased()
+void MainWindow::on_seekbarSlider_sliderPressed()
 {
     QMediaPlayer &player = mmmfcc.getPlayer();
-    int position = (float)ui->seekbarSlider->value() / ui->seekbarSlider->maximum() * player.duration();
-    player.setPosition(position);
+    player.pause();
 }
 
-void MainWindow::on_seekbarSlider_sliderPressed()
+void MainWindow::on_seekbarSlider_sliderReleased()
 {
     QMediaPlayer &player = mmmfcc.getPlayer();
     int position = (float)ui->seekbarSlider->value() / ui->seekbarSlider->maximum() * player.duration();
@@ -146,7 +144,6 @@ void MainWindow::on_seekTopButton_clicked()
     mmmfcc.getPlayer().setPosition(0);
 }
 
-
 void MainWindow::on_freeze1Button_clicked()
 {
     mmmfcc.getGraph().freeze1Graph();
@@ -167,13 +164,11 @@ void MainWindow::on_selectSourceFileButton_clicked()
     mmmfcc.getTranslator().setSource(Translator::Source::File);
 }
 
-
 void MainWindow::on_toggleGraphButton_clicked()
 {
     Graph &graph = mmmfcc.getGraph();
-    graph.isHideCurrentGraph = (graph.isHideCurrentGraph == false);
+    graph.setIsHideCurrentGraph(graph.getIsHideCurrentGraph() == false);
 }
-
 
 void MainWindow::on_inputDeviceComboBox_currentIndexChanged(int index)
 {
@@ -181,44 +176,39 @@ void MainWindow::on_inputDeviceComboBox_currentIndexChanged(int index)
     mmmfcc.setAudioDevice(info);
 }
 
-
 void MainWindow::on_graphScalelSlider_valueChanged(int value)
 {
     double scale = value / 1000.0;
     mmmfcc.getGraph().setScale(scale);
 }
 
-
 void MainWindow::on_autoScalecheckBox_stateChanged(int state)
 {
     if (state == Qt::CheckState::Checked){
-        mmmfcc.getGraph().isAutoScele = true;
+        mmmfcc.getGraph().setIsAutoScele(true);
     }else{
-        mmmfcc.getGraph().isAutoScele = false;
+        mmmfcc.getGraph().setIsAutoScele(false);
     }
 }
 
-
 void MainWindow::on_graphTypeLineButton_clicked()
 {
-    mmmfcc.getGraph().graphType = Graph::GraphType::Line;
+    mmmfcc.getGraph().setGraphType(Graph::GraphType::Line);
 }
 
 
 void MainWindow::on_graphTypeBarButton_clicked()
 {
-    mmmfcc.getGraph().graphType = Graph::GraphType::Bar;
+    mmmfcc.getGraph().setGraphType(Graph::GraphType::Bar);
 }
-
 
 void MainWindow::on_preProcessNoneButton_clicked()
 {
-    mmmfcc.getGraph().isMovingAvarage = false;
+    mmmfcc.getGraph().setIsMovingAvarage(false);
 }
-
 
 void MainWindow::on_preProcessMovingAverageButton_clicked()
 {
-    mmmfcc.getGraph().isMovingAvarage = true;
+    mmmfcc.getGraph().setIsMovingAvarage(true);
 }
 

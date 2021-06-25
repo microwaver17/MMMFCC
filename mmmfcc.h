@@ -39,10 +39,10 @@ private:
     Graph graph;
 
 signals:
-    void timeoutTranslator();
+    void dispatchTransrator();
 
 private slots:
-    void dispatchTransrator();
+    void timeoutTranslator();
     void paintGraph(QVector<double> data);
 
 };

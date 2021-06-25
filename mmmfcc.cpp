@@ -15,11 +15,12 @@ MmMfcc::MmMfcc(QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<QVector<double>>();
 
-    translator.moveToThread(&translatorThread);
-    connect(&translatorTimer, &QTimer::timeout, this, &MmMfcc::dispatchTransrator);
-    connect(this, &MmMfcc::timeoutTranslator, &translator, &Translator::doTranslate);
-    connect(&translator, &Translator::updated, this, &MmMfcc::paintGraph);
+    connect(&translatorTimer, &QTimer::timeout, this, &MmMfcc::timeoutTranslator);      // 1/fps 秒ごとにMFCC計算実行を判断
+    connect(this, &MmMfcc::dispatchTransrator, &translator, &Translator::doTranslate);  // MFCC計算実行
+    connect(&translator, &Translator::updated, this, &MmMfcc::paintGraph);              // 計算終了->グラフ描画
 
+    // 計算は別スレッド
+    translator.moveToThread(&translatorThread);
     translatorThread.start();
     translatorTimer.start(1000.0 / SETTINGS.fps);
     LOG.addLog(u8"スレッド開始", this);
@@ -58,12 +59,12 @@ Translator &MmMfcc::getTranslator()
     return translator;
 }
 
-void MmMfcc::dispatchTransrator()
+void MmMfcc::timeoutTranslator()
 {
     if (isTranslating){
-        return; //フレームスキップ
+        return; //計算が終わってなければフレームスキップ
     }
-    emit timeoutTranslator();
+    emit dispatchTransrator();
     isTranslating = true;
 }
 

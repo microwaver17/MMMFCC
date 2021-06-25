@@ -29,7 +29,8 @@ HEADERS += \
     mainwindow.h \
     mmmfcc.h \
     settings.h \
-    translator.h
+    translator.h \
+    util.h
 
 FORMS += \
     mainwindow.ui

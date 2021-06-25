@@ -245,7 +245,7 @@
         <item>
          <widget class="QPushButton" name="toggleGraphButton">
           <property name="text">
-           <string>Hide / Show</string>
+           <string>表示/非表示</string>
           </property>
          </widget>
         </item>
@@ -381,6 +381,20 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string>マニュアル</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>設定</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
