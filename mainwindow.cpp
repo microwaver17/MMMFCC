@@ -15,15 +15,14 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    Settings &stgs = Settings::getInstance();
-
     Graph &graph = mmmfcc.getGraph();
     ui->graphGraphicsView->setScene(&graph.getScene());
-    graph.setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
-    ui->graphScalelSlider->setValue(stgs.default_scale * 1000);
-    ui->autoScalecheckBox->setChecked(stgs.isAutoScale);
+    ui->graphScalelSlider->setValue(SETTINGS.default_scale * 1000);
+    ui->autoScalecheckBox->setChecked(SETTINGS.isAutoScale);
 
-    connect(&Log::getInstance(), &Log::logAdded, this, &MainWindow::updateLog);
+    mmmfcc.getGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
+
+    connect(&LOG, &Log::logAdded, this, &MainWindow::updateLog);
     connect(&mmmfcc.getPlayer(), &QMediaPlayer::positionChanged, this, &MainWindow::updateSeekbar);
 
     updateLog();
@@ -41,8 +40,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    QMainWindow::resizeEvent(event);
-    mmmfcc.getGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
+//    QMainWindow::resizeEvent(event);
+//    mmmfcc.getGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -71,7 +70,7 @@ void MainWindow::updateSeekbar(){
 
 void MainWindow::updateLog()
 {
-    auto logs = Log::getInstance().getLogs();
+    auto logs = LOG.getLogs();
     QString logtext = "";
     for (int i = 0; i < logs.size(); i++){
         auto log = logs.at(i);
@@ -209,5 +208,17 @@ void MainWindow::on_graphTypeLineButton_clicked()
 void MainWindow::on_graphTypeBarButton_clicked()
 {
     mmmfcc.getGraph().graphType = Graph::GraphType::Bar;
+}
+
+
+void MainWindow::on_preProcessNoneButton_clicked()
+{
+    mmmfcc.getGraph().isMovingAvarage = false;
+}
+
+
+void MainWindow::on_preProcessMovingAverageButton_clicked()
+{
+    mmmfcc.getGraph().isMovingAvarage = true;
 }
 

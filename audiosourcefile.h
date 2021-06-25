@@ -7,21 +7,28 @@
 #include <QMediaPlayer>
 #include <QMutex>
 
-#include "abstractaudiosource.h"
-
-class AudioSourceFile : public AbstractAudioSource
+class AudioSourceFile : public QObject
 {
     Q_OBJECT
 public:
     explicit AudioSourceFile(QObject *parent = nullptr);
     void setSource(QString path);
     QMediaPlayer &getPlayer();
+    QVector<qint16> getRawSamples(int fromSamles);
 
 private:
+    QVector<qint16> rawSamples;
+    QMutex rawSamplesMutex;
+    QAudioDecoder decoder;
+    QAudioFormat format;
+    QString path;
     QMediaPlayer player;
     bool bufferReady;
 
 private slots:
+    void readDecodedAudioBuffer();
+    void finalizeDecode();
+    void notifyDecodeError(QAudioDecoder::Error error);
     void playAgain();
 
 };

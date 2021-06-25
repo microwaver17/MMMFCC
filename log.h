@@ -1,6 +1,8 @@
 ﻿#ifndef LOG_H
 #define LOG_H
 
+#define LOG (Log::getInstance())
+
 #include <QObject>
 #include <QVector>
 

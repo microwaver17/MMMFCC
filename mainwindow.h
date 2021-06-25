@@ -47,5 +47,7 @@ private slots:
     void on_autoScalecheckBox_stateChanged(int state);
     void on_graphTypeLineButton_clicked();
     void on_graphTypeBarButton_clicked();
+    void on_preProcessNoneButton_clicked();
+    void on_preProcessMovingAverageButton_clicked();
 };
 #endif // MAINWINDOW_H

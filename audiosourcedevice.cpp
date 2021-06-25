@@ -7,8 +7,9 @@
 #include <QtDebug>
 #include <QFile>
 
-AudioSourceDevice::AudioSourceDevice(QObject *parent) : AbstractAudioSource(parent)
+AudioSourceDevice::AudioSourceDevice(QObject *parent) : QObject(parent)
   , audioInput(nullptr)
+  , format(SETTINGS.getFormat())
 {
 }
 
@@ -17,27 +18,37 @@ AudioSourceDevice::~AudioSourceDevice()
     delete audioInput;
 }
 
+QVector<qint16> AudioSourceDevice::getRawSamples(int fromSamples)
+{
+    QMutexLocker locker(&rawSamplesMutex);
+    if (fromSamples > rawSamples.size()){
+        return QVector<qint16>();
+    }
+
+    return rawSamples.mid(fromSamples, SETTINGS.windowLength * SETTINGS.sampleRate);
+}
+
 void AudioSourceDevice::setSource(QAudioDeviceInfo info)
 {
     if (!info.isFormatSupported(format)){
 //        QAudioFormat new_format = info.nearestFormat(format);
 
 //        if (new_format.channelCount() != 1 || new_format.sampleSize() != Consts::sampleSize){
-//            Log::getInstance().addLog(u8"フォーマットが未対応", this);
+//            LOG.addLog(u8"フォーマットが未対応", this);
 //            return;
 //        }
-        Log::getInstance().addLog(u8"未対応のフォーマット（デバイス） " + info.deviceName(), this);
+        LOG.addLog(u8"未対応のフォーマット（デバイス） " + info.deviceName(), this);
         return;
     }
     qDebug() << info.deviceName();
 
     delete audioInput;
     audioInput = new QAudioInput(info, format, this);
-    audioInput->setNotifyInterval(Settings::getInstance().windowLength);
+    audioInput->setNotifyInterval(SETTINGS.windowLength);
     audioDevice = audioInput->start();
     connect(audioInput, &QAudioInput::notify, this, &AudioSourceDevice::readAudioBuffer);
 
-    Log::getInstance().addLog(u8"オープン（デバイス） " + info.deviceName(), this);
+    LOG.addLog(u8"オープン（デバイス） " + info.deviceName(), this);
 }
 
 

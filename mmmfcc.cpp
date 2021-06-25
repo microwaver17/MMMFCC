@@ -21,8 +21,8 @@ MmMfcc::MmMfcc(QObject *parent) : QObject(parent)
     connect(&translator, &Translator::updated, this, &MmMfcc::paintGraph);
 
     translatorThread.start();
-    translatorTimer.start(1000.0 / Settings::getInstance().fps);
-    Log::getInstance().addLog(u8"スレッド開始", this);
+    translatorTimer.start(1000.0 / SETTINGS.fps);
+    LOG.addLog(u8"スレッド開始", this);
 }
 
 MmMfcc::~MmMfcc()
@@ -70,8 +70,5 @@ void MmMfcc::dispatchTransrator()
 void MmMfcc::paintGraph(QVector<double> data)
 {
     isTranslating = false;
-    if (data.size() == 0){
-        return;
-    }
     graph.plotData(data);
 }

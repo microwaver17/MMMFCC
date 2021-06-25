@@ -7,12 +7,15 @@
 
 Graph::Graph(QObject *parent) : QObject(parent)
   , isHideCurrentGraph(false)
-  , isAutoScele(Settings::getInstance().isAutoScale)
+  , isAutoScele(true)
+  , isMovingAvarage(false)
   , graphType(GraphType::Line)
   , width(0)
   , height(0)
-  , scale(Settings::getInstance().default_scale * Settings::getInstance().scale_multiple)
+  , scale(SETTINGS.default_scale * SETTINGS.scale_multiple)
   , scene(0, 0, width - x_margin, height - y_margin)
+  , currentHistory(SETTINGS.movingAverageSize)
+  , movavg_cursor(0)
 {
 }
 
@@ -25,19 +28,30 @@ void Graph::setSceneSize(int width, int height)
 
 void Graph::setScale(double scale)
 {
-    this->scale = scale * Settings::getInstance().scale_multiple;
+    this->scale = scale * SETTINGS.scale_multiple;
 }
 
-void Graph::plotData(QVector<double> data)
+void Graph::plotData(QVector<double> const &data)
 {
-    current = data;
+    if (data.size() != 0){
+        current = data;
+        addMovingAverage(data);
+    }
     paint();
+}
+
+void Graph::addMovingAverage(QVector<double> const &data)
+{
+    currentHistory[movavg_cursor] = data;
+    movavg_cursor = (movavg_cursor + 1) % currentHistory.size();
 }
 
 void Graph::freeze1Graph()
 {
     if (freeze1.size() == 0){
-        freeze1 = current;
+        if (isMovingAvarage){
+            freeze1 = current;
+        }
     }else{
         freeze1.clear();
     }
@@ -67,16 +81,30 @@ QVector<double> normalize(QVector<double> data)
 
 void Graph::paint()
 {
-    const QPen currentPen(Qt::blue, Settings::getInstance().lineSize);
-    const QPen freeze1Pen(Qt::green, Settings::getInstance().lineSize);
-    const QPen freeze2Pen(Qt::magenta, Settings::getInstance().lineSize);
+    const QPen currentPen(Qt::blue, SETTINGS.lineSize);
+    const QPen freeze1Pen(Qt::green, SETTINGS.lineSize);
+    const QPen freeze2Pen(Qt::magenta, SETTINGS.lineSize);
     const QPen gridPen(Qt::gray, 1);
     QFont labelFont("Arial", 12);
     labelFont.setStyleHint(QFont::SansSerif);
 
-    QVector<double> n_current = normalize(current);
-    QVector<double> n_freeze1 = normalize(freeze1);
-    QVector<double> n_freeze2 = normalize(freeze2);
+    QVector<double> current_movavg(current.size());
+    for (auto cur = currentHistory.begin(); cur != currentHistory.end(); cur++){
+        for (int i_mfcc = 0; i_mfcc < cur->size(); i_mfcc++){
+            current_movavg[i_mfcc] += cur->at(i_mfcc) / currentHistory.size();
+        }
+    }
+
+    QVector<double> n_current;
+    QVector<double> n_freeze1;
+    QVector<double> n_freeze2;
+    if (isMovingAvarage){
+        n_current = normalize(current_movavg);
+    }else{
+        n_current = normalize(current);
+    }
+    n_freeze1 = normalize(freeze1);
+    n_freeze2 = normalize(freeze2);
 
     scene.clear();
     paintGrid(n_current.size(), gridPen);
@@ -124,7 +152,7 @@ double sigmoid(double x){
     return x / (1.0 + abs(x));
 }
 
-void Graph::paintLine(QVector<double> &data, QPen pen)
+void Graph::paintLine(QVector<double> const &data, QPen pen)
 {
     double x_distance = (double)width / (data.size() - 1);
     double y_center = (double)height / 2;
@@ -146,7 +174,7 @@ void Graph::paintLine(QVector<double> &data, QPen pen)
     }
 }
 
-void Graph::paintBar(QVector<double> &data, QBrush brush)
+void Graph::paintBar(QVector<double> const &data, QBrush brush)
 {
     QColor color = brush.color();
     color.setAlphaF(0.5);
