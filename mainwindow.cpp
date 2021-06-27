@@ -105,6 +105,8 @@ void MainWindow::on_playPauseButton_clicked()
         player.pause();
     }else{
         player.play();
+        mmmfcc.getTranslator().setSource(Translator::Source::File);
+        mmmfcc.getGraph().setIsHideCurrentGraph(false);
     }
 }
 
@@ -157,23 +159,26 @@ void MainWindow::on_freeze2Button_clicked()
 void MainWindow::on_selectSourceMicButton_clicked()
 {
     mmmfcc.getTranslator().setSource(Translator::Source::Device);
+    mmmfcc.getGraph().setIsHideCurrentGraph(false);
 }
 
 void MainWindow::on_selectSourceFileButton_clicked()
 {
     mmmfcc.getTranslator().setSource(Translator::Source::File);
+    mmmfcc.getGraph().setIsHideCurrentGraph(false);
 }
 
 void MainWindow::on_toggleGraphButton_clicked()
 {
     Graph &graph = mmmfcc.getGraph();
-    graph.setIsHideCurrentGraph(graph.getIsHideCurrentGraph() == false);
+    mmmfcc.getGraph().setIsHideCurrentGraph(graph.getIsHideCurrentGraph() == false);
 }
 
 void MainWindow::on_inputDeviceComboBox_currentIndexChanged(int index)
 {
     QAudioDeviceInfo info = devicesInfo.at(index);
     mmmfcc.setAudioDevice(info);
+    mmmfcc.getGraph().setIsHideCurrentGraph(false);
 }
 
 void MainWindow::on_graphScalelSlider_valueChanged(int value)

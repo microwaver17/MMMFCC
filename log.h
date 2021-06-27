@@ -11,7 +11,7 @@ class Log : public QObject
     Q_OBJECT
 public:
     static Log &getInstance();
-    void addLog(QString msg, QObject *sender = nullptr);
+    void addLog(QString msg, QObject *sender);
     QVector<QMap<QString, QString>> &getLogs();
 
 private:

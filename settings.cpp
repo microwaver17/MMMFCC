@@ -1,32 +1,32 @@
 ﻿#include "settings.h"
 
 #include <QSettings>
-#include <QCoreApplication>
 #include <QFileInfo>
 
 Settings::Settings(){
     load();
+    save();
 }
 
 void Settings::load(){
-    QString path = QCoreApplication::applicationDirPath() + "/settings.ini";
+    QString path = getSettingsPsth();
     if (QFileInfo::exists(path) == false){
-        save();
         return;
     }
     QSettings ini(path, QSettings::IniFormat);
 
-    windowLength = ini.value("windowLength").toInt();
-    cepstramNumber = ini.value("cepstramNumber").toInt();
-    fps = ini.value("fps").toInt();
-    scale_multiple = ini.value("scale_multiple").toDouble();
-    default_scale = ini.value("default_scale").toDouble();
-    isAutoScale = ini.value("isAutoScale").toBool();
-    movingAverageSize = ini.value("movingAverageSize").toInt();
+    windowLength = ini.value("windowLength", windowLength).toInt();
+    cepstramNumber = ini.value("cepstramNumber", cepstramNumber).toInt();
+    fps = ini.value("fps", fps).toInt();
+    scale_multiple = ini.value("scale_multiple", scale_multiple).toDouble();
+    default_scale = ini.value("default_scale", default_scale).toDouble();
+    isAutoScale = ini.value("isAutoScale", isAutoScale).toBool();
+    movingAverageSize = ini.value("movingAverageSize", movingAverageSize).toInt();
+    filterNumber = ini.value("filterNumber", filterNumber).toInt();
 }
 
 void Settings::save(){
-    QString path = QCoreApplication::applicationDirPath() + "/settings.ini";
+    QString path = getSettingsPsth();
     QSettings ini(path, QSettings::IniFormat);
 
     ini.setValue("windowLength", windowLength);
@@ -36,6 +36,7 @@ void Settings::save(){
     ini.setValue("default_scale", default_scale);
     ini.setValue("isAutoScale", isAutoScale);
     ini.setValue("movingAverageSize", movingAverageSize);
+    ini.setValue("filterNumber", filterNumber);
     ini.sync();
 }
 

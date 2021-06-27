@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QAudioFormat>
+#include <QCoreApplication>
 
 class Settings{
 
@@ -23,7 +24,8 @@ public:
 
     // MFCC
     int windowLength = 25;
-    int cepstramNumber = 12;
+    int filterNumber = 24;      // 圧縮するスペクト次元
+    int cepstramNumber = 12 * 2;    // 表示するスペクトル次元
 
     // 画面表示系
     int fps = 30;
@@ -34,6 +36,9 @@ public:
 
 private:
     Settings();
+    inline QString getSettingsPsth(){
+        return QCoreApplication::applicationDirPath() + "/settings.ini";
+    }
     void save();
     void load();
 

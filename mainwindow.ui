@@ -166,7 +166,7 @@
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Freeze1</string>
+           <string>Hold1</string>
           </property>
          </widget>
         </item>
@@ -222,7 +222,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Freeze2</string>
+           <string>Hold2</string>
           </property>
          </widget>
         </item>
@@ -241,6 +241,13 @@
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>リアルタイム表示</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="toggleGraphButton">

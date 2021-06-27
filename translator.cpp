@@ -52,6 +52,6 @@ void Translator::doTranslate()
 void Translator::setSource(Source source)
 {
     QString source_str = Util::toStrEnum<Source>(source);
-    LOG.addLog(u8"音声ソースを変更 " + source_str);
+    LOG.addLog(u8"音声ソースを変更 " + source_str, this);
     currentSource = source;
 }
