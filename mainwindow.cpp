@@ -15,8 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    Graph &graph = mmmfcc.getGraph();
-    ui->graphGraphicsView->setScene(&graph.getScene());
     ui->graphScalelSlider->setValue(SETTINGS.default_scale * 1000);
     ui->autoScalecheckBox->setChecked(SETTINGS.isAutoScale);
 
@@ -24,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(&LOG, &Log::logAdded, this, &MainWindow::updateLog);
     connect(&mmmfcc.getPlayer(), &QMediaPlayer::positionChanged, this, &MainWindow::updateSeekbar);
+    connect(&mmmfcc.getGraph(), &Graph::updated, this, &MainWindow::updateScene);
 
     updateLog();
 
@@ -60,6 +59,15 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }else if(key == Qt::Key_Plus){
         on_seekForwardButton_clicked();
     }
+}
+
+void MainWindow::updateScene()
+{
+    int width = ui->graphGraphicsView->width();
+    int height = ui->graphGraphicsView->height();
+    ui->graphGraphicsView->setScene(nullptr);
+    ui->graphGraphicsView->setScene(mmmfcc.getGraph().getScene());
+    ui->graphGraphicsView->setSceneRect(3, 3, width-3, height-3);
 }
 
 void MainWindow::updateSeekbar(){
@@ -126,7 +134,7 @@ void MainWindow::on_seekbarSlider_sliderReleased()
 void MainWindow::on_seekBackButton_clicked()
 {
     QMediaPlayer &player = mmmfcc.getPlayer();
-    int position = player.position() - 100;
+    int position = player.position() - 1000;
     player.pause();
     player.setPosition(position);
 }
@@ -135,7 +143,7 @@ void MainWindow::on_seekBackButton_clicked()
 void MainWindow::on_seekForwardButton_clicked()
 {
     QMediaPlayer &player = mmmfcc.getPlayer();
-    int position = player.position() + 100;
+    int position = player.position() + 1000;
     player.pause();
     player.setPosition(position);
 }
@@ -215,5 +223,19 @@ void MainWindow::on_preProcessNoneButton_clicked()
 void MainWindow::on_preProcessMovingAverageButton_clicked()
 {
     mmmfcc.getGraph().setIsMovingAvarage(true);
+}
+
+
+void MainWindow::on_algorithmMfccButton_clicked()
+{
+    mmmfcc.getTranslator().setAlgorithm(Translator::Algorithm::MFCC);
+    mmmfcc.getGraph().setIsZeroLineAtMiddle(true);
+}
+
+
+void MainWindow::on_algorithmFftButton_clicked()
+{
+    mmmfcc.getTranslator().setAlgorithm(Translator::Algorithm::FFT);
+    mmmfcc.getGraph().setIsZeroLineAtMiddle(false);
 }
 

@@ -89,10 +89,9 @@ public:
     // Process each frame and extract MFCC
     std::string processFrame(int16_t* samples, size_t N);
     // svlpにより追加;
-    std::vector<double> processFrame(std::vector<int16_t> &samples, size_t fromSamples);
-
-    // Read input file stream, extract MFCCs and write to output file stream
-    int process (std::ifstream &wavFp, std::ofstream &mfcFp);
+    void processFrame(std::vector<int16_t> &samples, size_t fromSamples);
+    std::vector<double> getMfcc();
+    std::vector<double> getpowerSpectralCoef(); //パワースペクトル
 };
 
 #endif // MFCC_H

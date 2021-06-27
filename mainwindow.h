@@ -27,6 +27,9 @@ private:
     MmMfcc mmmfcc;
     QList<QAudioDeviceInfo> devicesInfo;
 
+public slots:
+    void updateScene();
+
 private slots:
     void updateSeekbar();
     void updateLog();
@@ -49,5 +52,7 @@ private slots:
     void on_graphTypeBarButton_clicked();
     void on_preProcessNoneButton_clicked();
     void on_preProcessMovingAverageButton_clicked();
+    void on_algorithmMfccButton_clicked();
+    void on_algorithmFftButton_clicked();
 };
 #endif // MAINWINDOW_H

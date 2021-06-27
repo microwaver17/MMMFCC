@@ -21,13 +21,21 @@ public:
     };
     Q_ENUM(Source)
 
+    enum class Algorithm{
+        MFCC,
+        FFT,
+    };
+    Q_ENUM(Algorithm)
+
     void setSource(Source source);
+    void setAlgorithm(Algorithm algorithm);
 
 private:
     MFCC *mfccTranslator;
     AudioSourceFile &audioSourceFile;
     AudioSourceDevice &audioSourceDevice;
     Source currentSource;
+    Algorithm currentAlgorithm;
 
     QVector<double> translate(QVector<qint16> &samples, quint64 from);
 

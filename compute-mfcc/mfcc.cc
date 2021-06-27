@@ -204,10 +204,10 @@ MFCC::MFCC(int sampFreq, int nCep, int winLength, int frameShift, int numFilt, d
     compTwiddle();
 }
 
-std::vector<double> MFCC::processFrame(std::vector<int16_t> &samples, size_t fromSamples){
-    // サンプルが足りない時は空のvectorを返す
+void MFCC::processFrame(std::vector<int16_t> &samples, size_t fromSamples){
+    // サンプルが足りない時は何もしない
     if (samples.size() <= fromSamples + winLengthSamples){
-        return std::vector<double>();
+        return;
     }
 
     frame.clear();
@@ -219,6 +219,13 @@ std::vector<double> MFCC::processFrame(std::vector<int16_t> &samples, size_t fro
     computePowerSpec();
     applyLMFB();
     applyDct();
+}
 
+std::vector<double> MFCC::getMfcc(){
     return mfcc;
+}
+
+std::vector<double> MFCC::getpowerSpectralCoef()
+{
+    return powerSpectralCoef;
 }

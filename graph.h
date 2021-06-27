@@ -9,7 +9,6 @@ class Graph : public QObject
     Q_OBJECT
 public:
     explicit Graph(QObject *parent = nullptr);
-    QGraphicsScene &getScene();
 
     enum class GraphType{
         Line,
@@ -18,6 +17,7 @@ public:
     Q_ENUM(GraphType)
 
     void setSceneSize(int width, int height);
+    QGraphicsScene *getScene();
     void setScale(double scale);
     void plotData(QVector<double> const &data);
     void freeze1Graph();
@@ -27,17 +27,21 @@ public:
     void setIsHideCurrentGraph(bool newIsHideCurrentGraph);
     void setIsAutoScele(bool newIsAutoScele);
     void setIsMovingAvarage(bool newIsMovingAvarage);
+    void setIsZeroLineAtMiddle(bool newIsZeroLineAtMiddle);
     void setGraphType(GraphType newGraphType);
 
     bool getIsHideCurrentGraph() const;
 
+
 private:
     int width;
     int height;
-    const int x_margin = 20;
-    const int y_margin = 20;
+    int real_width;
+    int real_height;
+    const int x_margin = 10;
+    const int y_margin = 10;
     double scale;   // 縦軸の最大値
-    QGraphicsScene scene;
+    QGraphicsScene *scene;
     QVector<double> current;
     QVector<double> freeze1;
     QVector<double> freeze2;
@@ -48,6 +52,7 @@ private:
     bool isHideCurrentGraph;
     bool isAutoScele;
     bool isMovingAvarage;
+    bool isZeroLineAtMiddle;
     GraphType graphType;
 
     void addCurrentHistory(QVector<double> const &data);
@@ -59,7 +64,12 @@ private:
     void paintBar(QVector<double> const &data, QBrush brush);
     void paint();
 
+    void _addLine(double x1, double y1, double x2, double y2, QPen pen = QPen());
+    void _addSimpleText(QString text, double x, double y, QFont font = QFont(), QBrush brush = QBrush());
+    void _addRect(double x, double y, double w, double h, QPen pen = QPen(), QBrush brush = QBrush());
+
 signals:
+    void updated();
 
 };
 

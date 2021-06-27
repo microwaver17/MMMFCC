@@ -26,6 +26,8 @@ public:
     int windowLength = 25;
     int filterNumber = 24;      // 圧縮するスペクト次元
     int cepstramNumber = 12 * 2;    // 表示するスペクトル次元
+    int maxFreq = 6500;
+    int minFreq = 50;
 
     // 画面表示系
     int fps = 30;

@@ -11,22 +11,31 @@
 Graph::Graph(QObject *parent) : QObject(parent)
   , width(0)
   , height(0)
+  , real_width(0)
+  , real_height(0)
   , scale(SETTINGS.default_scale * SETTINGS.scale_multiple)
-  , scene(0, 0, width - x_margin, height - y_margin)
+  , scene(nullptr)
   , currentHistory(SETTINGS.movingAverageSize)
   , movavg_cursor(0)
   , isHideCurrentGraph(false)
   , isAutoScele(true)
   , isMovingAvarage(false)
+  , isZeroLineAtMiddle(true)
   , graphType(GraphType::Line)
 {
 }
 
 void Graph::setSceneSize(int width, int height)
 {
-    this->width = width - x_margin;
-    this->height = height - y_margin;
-    scene.setSceneRect(0, 0, this->width, this->height);
+    this->width = width - x_margin * 2;
+    this->height = height - y_margin * 2;
+    real_width = width;
+    real_height = height;
+}
+
+QGraphicsScene *Graph::getScene()
+{
+    return scene;
 }
 
 void Graph::setScale(double scale)
@@ -106,6 +115,12 @@ bool Graph::getIsHideCurrentGraph() const
     return isHideCurrentGraph;
 }
 
+void Graph::setIsZeroLineAtMiddle(bool newIsZeroLineAtMiddle)
+{
+    LOG.addLog(u8"グラフのゼロ点を半分の位置 " + Util::toStr(newIsZeroLineAtMiddle), this);
+    isZeroLineAtMiddle = newIsZeroLineAtMiddle;
+}
+
 void Graph::setIsAutoScele(bool newIsAutoScele)
 {
     LOG.addLog(u8"グラフを自動スケール " + Util::toStr(newIsAutoScele), this);
@@ -150,6 +165,12 @@ inline double error(QVector<double> const &data1, QVector<double> const &data2){
 
 void Graph::paint()
 {
+    // scene.clear() よりインスタンスを作り直したほうが断然早い
+    if (scene != nullptr){
+        scene->deleteLater();
+    }
+    scene = new QGraphicsScene(0, 0, real_width, real_height);
+
     const QPen currentPen(Qt::blue, 2);
     const QPen freeze1Pen(Qt::green, 2);
     const QPen freeze2Pen(Qt::magenta, 2);
@@ -172,11 +193,14 @@ void Graph::paint()
     double err_freeze1 = error(n_current, n_freeze1);
     double err_freeze2 = error(n_current, n_freeze2);
 
-    scene.clear();
-    paintGrid(n_current.size(), gridPen);
-    paintLabel(n_current.size(), labelFont);
-    paintError(err_freeze1, 0, freeze1Pen.brush(), labelFont);
-    paintError(err_freeze2, 1, freeze2Pen.brush(), labelFont);
+    // FFTモード
+    qDebug() <<current.size() << SETTINGS.cepstramNumber;
+    if (current.size() <= SETTINGS.cepstramNumber){
+        paintGrid(n_current.size(), gridPen);
+        paintLabel(n_current.size(), labelFont);
+        paintError(err_freeze1, 0, freeze1Pen.brush(), labelFont);
+        paintError(err_freeze2, 1, freeze2Pen.brush(), labelFont);
+    }
 
     if (graphType == GraphType::Line){
         paintLine(n_freeze1, freeze1Pen);
@@ -191,18 +215,37 @@ void Graph::paint()
             paintBar(n_current, currentPen.brush());
         }
     }
+
+    emit updated();
+}
+
+void Graph::_addLine(double x1, double y1, double x2, double y2, QPen pen)
+{
+    scene->addLine(x1 + x_margin, y1 + y_margin, x2 + x_margin, y2 + y_margin, pen);
+}
+
+void Graph::_addSimpleText(QString text, double x, double y, QFont font, QBrush brush)
+{
+    QGraphicsSimpleTextItem *item = scene->addSimpleText(text, font);
+    item->setPos(x + x_margin, y + y_margin);
+    item->setBrush(brush);
+}
+
+void Graph::_addRect(double x, double y, double w, double h, QPen pen, QBrush brush)
+{
+    scene->addRect(x + x_margin, y + y_margin, w, h, pen, brush);
 }
 
 void Graph::paintGrid(int n, QPen pen)
 {
     double x_distance = (double)width / (n - 1);
-    double y_center = (double)height / 2;
-    scene.addLine(0, y_center, width, y_center);
-    scene.addLine(0, 0, width, 0);
-    scene.addLine(0, height, width,  height);
+    double y_center = isZeroLineAtMiddle ? (double)height / 2 : height;
+    _addLine(0, y_center, width, y_center);
+    _addLine(0, 0, width, 0);
+    _addLine(0, height, width,  height);
     for(int i = 0; i < n; i++){
         int x = i * x_distance;
-        scene.addLine(x, 0, x, height, pen);
+        _addLine(x, 0, x, height, pen);
     }
 }
 
@@ -210,8 +253,7 @@ void Graph::paintLabel(int n, QFont font)
 {
     double x_distance = (double)width / (n - 1);
     for(int i = 0; i < n - 1; i++){
-        QPointF pos(i * x_distance + 5, 5);
-        scene.addSimpleText(QString::number(i + 1), font)->setPos(pos);
+        _addSimpleText(QString::number(i + 1), i * x_distance + 5, 5, font);
     }
 }
 
@@ -225,13 +267,10 @@ void Graph::paintError(double err, int idx, QBrush brush, QFont font)
     color.setAlphaF(0.5);
     brush.setColor(color);
 
-    QPointF lable_pos(x_origin + max_bar_length + 10, y_origin);
-    QGraphicsSimpleTextItem *textItem = scene.addSimpleText(QString::number(err), font);
-    textItem->setPos(lable_pos);
-    textItem->setBrush(QBrush(QColor(0, 0, 0, 127)));
+    _addSimpleText(QString::number(err), x_origin + max_bar_length + 10, y_origin, font, QBrush(QColor(0, 0, 0, 127)));
 
-    scene.addRect(x_origin, y_origin + 5, max_bar_length, 10, QPen(Qt::NoPen), QBrush(QColor(230,230,230,180)));
-    scene.addRect(x_origin, y_origin + 5, err * max_bar_length, 10, QPen(Qt::NoPen), brush);
+    _addRect(x_origin, y_origin + 5, max_bar_length, 10, QPen(Qt::NoPen), QBrush(QColor(230,230,230,180)));
+    _addRect(x_origin, y_origin + 5, err * max_bar_length, 10, QPen(Qt::NoPen), brush);
 }
 
 void Graph::paintLine(QVector<double> const &data, QPen pen)
@@ -240,7 +279,7 @@ void Graph::paintLine(QVector<double> const &data, QPen pen)
     color.setAlphaF(0.5);
     pen.setColor(color);
     double x_distance = (double)width / (data.size() - 1);
-    double y_center = (double)height / 2;
+    double y_center = isZeroLineAtMiddle ? (double)height / 2 : height;
     for (int i = 0; i < data.size() - 1; i++){
         double val = data.at(i);
         double val_next = data.at(i + 1);
@@ -255,7 +294,7 @@ void Graph::paintLine(QVector<double> const &data, QPen pen)
         double y_0 = y_center - val;   // 座標が値と+-逆
         double x_1 = x_distance * (i + 1);
         double y_1 = y_center - val_next;
-        scene.addLine(x_0, y_0, x_1, y_1, pen);
+        _addLine(x_0, y_0, x_1, y_1, pen);
     }
 }
 
@@ -265,7 +304,7 @@ void Graph::paintBar(QVector<double> const &data, QBrush brush)
     color.setAlphaF(0.5);
     brush.setColor(color);
     double x_distance = (double)width / (data.size() - 1);
-    double y_center = (double)height / 2;
+    double y_center = isZeroLineAtMiddle ? (double)height / 2 : height;
     for (int i = 0; i < data.size() - 1; i++){
         double val = data.at(i);
         if (isAutoScele){
@@ -285,13 +324,7 @@ void Graph::paintBar(QVector<double> const &data, QBrush brush)
             x_1 = x_distance * (i + 1);
             y_1 = y_center - val;   // 座標が値と+-逆
         }
-        QRectF rect(QPointF(x_0, y_0), QPointF(x_1, y_1));
-        scene.addRect(rect, QPen(), brush);
+        _addRect(x_0, y_0, x_1 - x_0, y_1 - y_0, QPen(), brush);
     }
 
-}
-
-QGraphicsScene &Graph::getScene()
-{
-    return scene;
 }
