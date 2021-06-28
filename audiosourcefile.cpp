@@ -1,5 +1,6 @@
 ﻿#include "audiosourcefile.h"
 #include "log.h"
+#include "status.h"
 
 #include <QFile>
 #include <QDataStream>
@@ -17,8 +18,10 @@ AudioSourceFile::AudioSourceFile(QObject *parent) : QObject(parent)
     connect(&decoder, QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), this, &AudioSourceFile::notifyDecodeError);
     connect(&decoder,&QAudioDecoder::finished, this, &AudioSourceFile::finalizeDecode);
 
-    player.setNotifyInterval(100);
+    player.setNotifyInterval(SETTINGS.playerTimeUnit);
     connect(&player, &QMediaPlayer::stateChanged, this, &AudioSourceFile::playAgain);
+
+    Status::getInstance().setState(Status::Subject::PlayerReady, false);
 }
 
 QVector<qint16> AudioSourceFile::getRawSamples(int fromSamples)
@@ -52,7 +55,6 @@ void AudioSourceFile::setSource(QString path)
     player.play();
 
     this->path = path;
-    qDebug() << path;
 
     LOG.addLog(u8"デコード開始", this);
     if (decoder.state() == QAudioDecoder::DecodingState){
@@ -60,15 +62,14 @@ void AudioSourceFile::setSource(QString path)
     }
     rawSamples.clear();
     decoder.setSourceFilename(path);
-    qDebug() << path;
     decoder.start();
+    Status::getInstance().setState(Status::Subject::Decoder, true);
+    Status::getInstance().setState(Status::Subject::PlayerReady, true);
 }
 
 void AudioSourceFile::notifyDecodeError(QAudioDecoder::Error error){
     LOG.addLog(u8"デコードエラー " + decoder.errorString(), this);
-    qDebug() << "decode error";
-    qDebug() << decoder.duration();
-    qDebug() << decoder.errorString();
+    Status::getInstance().setState(Status::Subject::Decoder, Status::State::Secondary);
 }
 
 void AudioSourceFile::readDecodedAudioBuffer(){
@@ -79,17 +80,15 @@ void AudioSourceFile::readDecodedAudioBuffer(){
     for (int i = 0; i < buffer.sampleCount(); i++){
         rawSamples.append(data[i]);
     }
-//    qDebug() << "decode buffer";
-//    qDebug() << decoder.duration();
-//    qDebug() << decoder.errorString();
 }
 
 void AudioSourceFile::finalizeDecode()
 {
     LOG.addLog(u8"デコード終了", this);
-//    qDebug() << "decode finish";
-//    qDebug() << decoder.duration();
-//    qDebug() << decoder.errorString();
+
+    // 正しく読み込めたかテストするために書き出す
+    // ffmpeg -f s16le -ar 48000 -ac 1 -i ***.raw test.wav
+    // みたいにすると聞けるファイルができる
     /*
     QFile file(path + ".raw");
     if(file.open(QIODevice::WriteOnly)){
@@ -100,4 +99,5 @@ void AudioSourceFile::finalizeDecode()
        file.close();
     }
     */
+    Status::getInstance().setState(Status::Subject::Decoder, Status::State::Secondary);
 }

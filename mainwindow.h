@@ -18,7 +18,6 @@ public:
     ~MainWindow();
 
 protected:
-    void resizeEvent(QResizeEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
 
 private:
@@ -29,13 +28,13 @@ private:
 
 public slots:
     void updateScene();
+    void updateStatus();
 
 private slots:
     void updateSeekbar();
     void updateLog();
     void on_openAudioFile_clicked();
     void on_playPauseButton_clicked();
-    void on_seekbarSlider_sliderReleased();
     void on_seekBackButton_clicked();
     void on_seekForwardButton_clicked();
     void on_freeze1Button_clicked();
@@ -43,7 +42,6 @@ private slots:
     void on_selectSourceMicButton_clicked();
     void on_selectSourceFileButton_clicked();
     void on_toggleGraphButton_clicked();
-    void on_seekbarSlider_sliderPressed();
     void on_seekTopButton_clicked();
     void on_inputDeviceComboBox_currentIndexChanged(int index);
     void on_graphScalelSlider_valueChanged(int value);
@@ -54,5 +52,6 @@ private slots:
     void on_preProcessMovingAverageButton_clicked();
     void on_algorithmMfccButton_clicked();
     void on_algorithmFftButton_clicked();
+    void on_seekbarSlider_valueChanged(int value);
 };
 #endif // MAINWINDOW_H

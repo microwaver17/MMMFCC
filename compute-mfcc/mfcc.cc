@@ -229,3 +229,9 @@ std::vector<double> MFCC::getpowerSpectralCoef()
 {
     return powerSpectralCoef;
 }
+
+size_t MFCC::getNumFFTBins() const
+{
+    return numFFTBins;
+}
+

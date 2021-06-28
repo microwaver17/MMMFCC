@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "log.h"
 #include "settings.h"
+#include "status.h"
 
 #include <QAudioDeviceInfo>
 #include <QFileDialog>
@@ -21,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     mmmfcc.getGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
 
     connect(&LOG, &Log::logAdded, this, &MainWindow::updateLog);
+    connect(&Status::getInstance(), &Status::statusUpdated, this, &MainWindow::updateStatus);
     connect(&mmmfcc.getPlayer(), &QMediaPlayer::positionChanged, this, &MainWindow::updateSeekbar);
     connect(&mmmfcc.getGraph(), &Graph::updated, this, &MainWindow::updateScene);
 
@@ -35,12 +37,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event)
-{
-//    QMainWindow::resizeEvent(event);
-//    mmmfcc.getGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -65,9 +61,56 @@ void MainWindow::updateScene()
 {
     int width = ui->graphGraphicsView->width();
     int height = ui->graphGraphicsView->height();
-    ui->graphGraphicsView->setScene(nullptr);
     ui->graphGraphicsView->setScene(mmmfcc.getGraph().getScene());
     ui->graphGraphicsView->setSceneRect(3, 3, width-3, height-3);
+    mmmfcc.getGraph().setSceneSize(width, height);
+}
+
+inline void setHighlightButtonOne(QPushButton *button, bool state){
+    if (button == nullptr){
+        return;
+    }
+
+    QString color = QColor(220, 220, 250).name();
+
+    if (state){
+        button->setStyleSheet(QString("QWidget {background-color: %1; font-weight: bold;}").arg(color));
+        button->setDown(true);
+    }else{
+        button->setStyleSheet("");
+        button->setDown(false);
+    }
+}
+
+inline void setHighlightButton(QPushButton *buttonPrimary, QPushButton *buttonSecondary, Status::Subject subject){
+    Status::State state = Status::getInstance().getState(subject);
+    if (state == Status::State::Primary){
+        setHighlightButtonOne(buttonPrimary, true);
+        setHighlightButtonOne(buttonSecondary, false);
+    }else if (state == Status::State::Secondary){
+        setHighlightButtonOne(buttonPrimary, false);
+        setHighlightButtonOne(buttonSecondary, true);
+    }else{
+        setHighlightButtonOne(buttonPrimary, false);
+        setHighlightButtonOne(buttonSecondary, false);
+    }
+}
+
+void MainWindow::updateStatus(){
+    setHighlightButton(ui->selectSourceMicButton, ui->selectSourceFileButton, Status::Subject::AudioSource);
+    setHighlightButton(ui->toggleGraphButton, nullptr, Status::Subject::ShowRealtimeGraph);
+    setHighlightButton(ui->algorithmMfccButton, ui->algorithmFftButton, Status::Subject::Algorithm);
+    setHighlightButton(ui->graphTypeLineButton, ui->graphTypeBarButton, Status::Subject::GraphType);
+    setHighlightButton(ui->preProcessMovingAverageButton, ui->preProcessNoneButton, Status::Subject::Smoothing);
+    setHighlightButton(ui->playPauseButton, nullptr, Status::Subject::Decoder);
+    setHighlightButton(ui->freeze1Button, nullptr, Status::Subject::Freeze1);
+    setHighlightButton(ui->freeze2Button, nullptr, Status::Subject::Freeze2);
+
+    if (Status::getInstance().getState(Status::Subject::PlayerReady) == Status::State::Primary){
+        ui->seekbarSlider->setEnabled(true);
+    }else{
+        ui->seekbarSlider->setEnabled(false);
+    }
 }
 
 void MainWindow::updateSeekbar(){
@@ -118,16 +161,13 @@ void MainWindow::on_playPauseButton_clicked()
     }
 }
 
-void MainWindow::on_seekbarSlider_sliderPressed()
-{
-    QMediaPlayer &player = mmmfcc.getPlayer();
-    player.pause();
-}
-
-void MainWindow::on_seekbarSlider_sliderReleased()
+void MainWindow::on_seekbarSlider_valueChanged(int value)
 {
     QMediaPlayer &player = mmmfcc.getPlayer();
     int position = (float)ui->seekbarSlider->value() / ui->seekbarSlider->maximum() * player.duration();
+    if (abs(position - player.position()) <= SETTINGS.playerTimeUnit){
+        return;
+    }
     player.setPosition(position);
 }
 
@@ -238,4 +278,3 @@ void MainWindow::on_algorithmFftButton_clicked()
     mmmfcc.getTranslator().setAlgorithm(Translator::Algorithm::FFT);
     mmmfcc.getGraph().setIsZeroLineAtMiddle(false);
 }
-

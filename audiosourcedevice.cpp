@@ -40,7 +40,6 @@ void AudioSourceDevice::setSource(QAudioDeviceInfo info)
         LOG.addLog(u8"未対応のフォーマット（デバイス） " + info.deviceName(), this);
         return;
     }
-    qDebug() << info.deviceName();
 
     delete audioInput;
     audioInput = new QAudioInput(info, format, this);
@@ -71,6 +70,9 @@ void AudioSourceDevice::readAudioBuffer()
         rawSamples.append(val);
     }
 
+    // 正しく読み込めたかテストするために書き出す
+    // ffmpeg -f s16le -ar 48000 -ac 1 -i ***.raw test.wav
+    // みたいにすると聞けるファイルができる
     /*
     QFile file("test.raw");
     if(file.open(QIODevice::WriteOnly | QIODevice::Append)){

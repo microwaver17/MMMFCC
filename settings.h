@@ -36,6 +36,8 @@ public:
     bool isAutoScale = true;
     int movingAverageSize = fps / 5;
 
+    int playerTimeUnit = 100;
+
 private:
     Settings();
     inline QString getSettingsPsth(){

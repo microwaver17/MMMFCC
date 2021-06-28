@@ -92,6 +92,7 @@ public:
     void processFrame(std::vector<int16_t> &samples, size_t fromSamples);
     std::vector<double> getMfcc();
     std::vector<double> getpowerSpectralCoef(); //パワースペクトル
+    size_t getNumFFTBins() const;
 };
 
 #endif // MFCC_H

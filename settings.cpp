@@ -23,6 +23,7 @@ void Settings::load(){
     isAutoScale = ini.value("isAutoScale", isAutoScale).toBool();
     movingAverageSize = ini.value("movingAverageSize", movingAverageSize).toInt();
     filterNumber = ini.value("filterNumber", filterNumber).toInt();
+    playerTimeUnit = ini.value("playerTimeUnit", playerTimeUnit).toInt();
 }
 
 void Settings::save(){
@@ -37,6 +38,7 @@ void Settings::save(){
     ini.setValue("isAutoScale", isAutoScale);
     ini.setValue("movingAverageSize", movingAverageSize);
     ini.setValue("filterNumber", filterNumber);
+    ini.setValue("playerTimeUnit", playerTimeUnit);
     ini.sync();
 }
 

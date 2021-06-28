@@ -2,6 +2,7 @@
 #include "settings.h"
 #include "log.h"
 #include "util.h"
+#include "status.h"
 
 #include <QFont>
 #include <QGraphicsSimpleTextItem>
@@ -19,10 +20,16 @@ Graph::Graph(QObject *parent) : QObject(parent)
   , movavg_cursor(0)
   , isHideCurrentGraph(false)
   , isAutoScele(true)
-  , isMovingAvarage(false)
+  , isMovingAvarage(true)
   , isZeroLineAtMiddle(true)
   , graphType(GraphType::Line)
 {
+    Status::getInstance().setState(
+                Status::Subject::Smoothing,
+                isMovingAvarage ? Status::State::Primary : Status::State::Secondary);
+    Status::getInstance().setState(
+                Status::Subject::GraphType,
+                graphType == GraphType::Line ? Status::State::Primary : Status::State::Secondary);
 }
 
 void Graph::setSceneSize(int width, int height)
@@ -43,6 +50,54 @@ void Graph::setScale(double scale)
     this->scale = scale * SETTINGS.scale_multiple;
 }
 
+bool Graph::getIsHideCurrentGraph() const
+{
+    return isHideCurrentGraph;
+}
+
+void Graph::setIsHideCurrentGraph(bool newIsHideCurrentGraph)
+{
+    LOG.addLog(u8"グラフを非表示 " + Util::toStr(newIsHideCurrentGraph), this);
+    isHideCurrentGraph = newIsHideCurrentGraph;
+
+    Status::getInstance().setState(
+                Status::Subject::ShowRealtimeGraph,
+                newIsHideCurrentGraph ? Status::State::Secondary : Status::State::Primary);
+}
+
+void Graph::setIsZeroLineAtMiddle(bool newIsZeroLineAtMiddle)
+{
+    LOG.addLog(u8"グラフのゼロ点を半分の位置 " + Util::toStr(newIsZeroLineAtMiddle), this);
+    isZeroLineAtMiddle = newIsZeroLineAtMiddle;
+}
+
+void Graph::setIsAutoScele(bool newIsAutoScele)
+{
+    LOG.addLog(u8"グラフを自動スケール " + Util::toStr(newIsAutoScele), this);
+    isAutoScele = newIsAutoScele;
+}
+
+void Graph::setIsMovingAvarage(bool newIsMovingAvarage)
+{
+    LOG.addLog(u8"グラフの後処理（移動平均） " + Util::toStr(newIsMovingAvarage), this);
+    isMovingAvarage = newIsMovingAvarage;
+
+    Status::getInstance().setState(
+                Status::Subject::Smoothing,
+                newIsMovingAvarage ? Status::State::Primary : Status::State::Secondary);
+}
+
+void Graph::setGraphType(GraphType newGraphType)
+{
+    LOG.addLog(u8"グラフ種類 " + Util::toStrEnum<GraphType>(newGraphType), this);
+    graphType = newGraphType;
+
+    Status::getInstance().setState(
+                Status::Subject::GraphType,
+                newGraphType == GraphType::Line ? Status::State::Primary : Status::State::Secondary);
+}
+
+
 void Graph::plotData(QVector<double> const &data)
 {
     if (data.size() != 0){
@@ -54,6 +109,15 @@ void Graph::plotData(QVector<double> const &data)
 
 void Graph::addCurrentHistory(QVector<double> const &data)
 {
+    // FFTからMFCCに切り替えたときなど、配列のサイズが変わったとき
+    if (data.size() != currentHistory.at(0).size()){
+        for (auto cur = currentHistory.begin(); cur != currentHistory.end(); cur++){
+            cur->clear();
+        }
+        movavg_cursor = 0;
+        freeze1.clear();
+        freeze2.clear();
+    }
     currentHistory[movavg_cursor] = data;
     movavg_cursor = (movavg_cursor + 1) % currentHistory.size();
 }
@@ -78,8 +142,10 @@ void Graph::freeze1Graph()
         }else{
             freeze1 = current;
         }
+        Status::getInstance().setState(Status::Subject::Freeze1, true);
     }else{
         freeze1.clear();
+        Status::getInstance().setState(Status::Subject::Freeze1, false);
     }
     paint();
 }
@@ -92,8 +158,10 @@ void Graph::freeze2Graph()
         }else{
             freeze2 = current;
         }
+        Status::getInstance().setState(Status::Subject::Freeze2, true);
     }else{
         freeze2.clear();
+        Status::getInstance().setState(Status::Subject::Freeze2, false);
     }
     paint();
 }
@@ -104,42 +172,8 @@ void Graph::clearFreeze()
     freeze2.clear();
 }
 
-void Graph::setIsHideCurrentGraph(bool newIsHideCurrentGraph)
-{
-    LOG.addLog(u8"グラフを非表示 " + Util::toStr(newIsHideCurrentGraph), this);
-    isHideCurrentGraph = newIsHideCurrentGraph;
-}
 
-bool Graph::getIsHideCurrentGraph() const
-{
-    return isHideCurrentGraph;
-}
-
-void Graph::setIsZeroLineAtMiddle(bool newIsZeroLineAtMiddle)
-{
-    LOG.addLog(u8"グラフのゼロ点を半分の位置 " + Util::toStr(newIsZeroLineAtMiddle), this);
-    isZeroLineAtMiddle = newIsZeroLineAtMiddle;
-}
-
-void Graph::setIsAutoScele(bool newIsAutoScele)
-{
-    LOG.addLog(u8"グラフを自動スケール " + Util::toStr(newIsAutoScele), this);
-    isAutoScele = newIsAutoScele;
-}
-
-void Graph::setIsMovingAvarage(bool newIsMovingAvarage)
-{
-    LOG.addLog(u8"グラフの後処理（移動平均） " + Util::toStr(newIsMovingAvarage), this);
-    isMovingAvarage = newIsMovingAvarage;
-}
-
-void Graph::setGraphType(GraphType newGraphType)
-{
-    LOG.addLog(u8"グラフ種類 " + Util::toStrEnum<GraphType>(newGraphType), this);
-    graphType = newGraphType;
-}
-
-inline QVector<double> normalize(QVector<double> data)
+inline QVector<double> normalize(QVector<double> const data)
 {
     return data.mid(1);    // F0除去
 }
@@ -161,6 +195,24 @@ inline double error(QVector<double> const &data1, QVector<double> const &data2){
     }
 
     return err / size;
+}
+
+// 自動的にsceneのマージンを考慮してくれる関数
+void Graph::_addLine(double x1, double y1, double x2, double y2, QPen pen)
+{
+    scene->addLine(x1 + x_margin, y1 + y_margin, x2 + x_margin, y2 + y_margin, pen);
+}
+
+void Graph::_addSimpleText(QString text, double x, double y, QFont font, QBrush brush)
+{
+    QGraphicsSimpleTextItem *item = scene->addSimpleText(text, font);
+    item->setPos(x + x_margin, y + y_margin);
+    item->setBrush(brush);
+}
+
+void Graph::_addRect(double x, double y, double w, double h, QPen pen, QBrush brush)
+{
+    scene->addRect(x + x_margin, y + y_margin, w, h, pen, brush);
 }
 
 void Graph::paint()
@@ -193,8 +245,7 @@ void Graph::paint()
     double err_freeze1 = error(n_current, n_freeze1);
     double err_freeze2 = error(n_current, n_freeze2);
 
-    // FFTモード
-    qDebug() <<current.size() << SETTINGS.cepstramNumber;
+    // FFTモードのときは線などを書かない
     if (current.size() <= SETTINGS.cepstramNumber){
         paintGrid(n_current.size(), gridPen);
         paintLabel(n_current.size(), labelFont);
@@ -217,23 +268,6 @@ void Graph::paint()
     }
 
     emit updated();
-}
-
-void Graph::_addLine(double x1, double y1, double x2, double y2, QPen pen)
-{
-    scene->addLine(x1 + x_margin, y1 + y_margin, x2 + x_margin, y2 + y_margin, pen);
-}
-
-void Graph::_addSimpleText(QString text, double x, double y, QFont font, QBrush brush)
-{
-    QGraphicsSimpleTextItem *item = scene->addSimpleText(text, font);
-    item->setPos(x + x_margin, y + y_margin);
-    item->setBrush(brush);
-}
-
-void Graph::_addRect(double x, double y, double w, double h, QPen pen, QBrush brush)
-{
-    scene->addRect(x + x_margin, y + y_margin, w, h, pen, brush);
 }
 
 void Graph::paintGrid(int n, QPen pen)

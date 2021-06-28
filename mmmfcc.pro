@@ -18,6 +18,7 @@ SOURCES += \
     mainwindow.cpp \
     mmmfcc.cpp \
     settings.cpp \
+    status.cpp \
     translator.cpp
 
 HEADERS += \
@@ -29,6 +30,7 @@ HEADERS += \
     mainwindow.h \
     mmmfcc.h \
     settings.h \
+    status.h \
     translator.h \
     util.h
 
