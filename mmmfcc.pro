@@ -25,6 +25,7 @@ HEADERS += \
     audiosourcedevice.h \
     audiosourcefile.h \
     compute-mfcc/mfcc.h \
+    consts.h \
     graph.h \
     log.h \
     mainwindow.h \
@@ -41,3 +42,5 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES +=

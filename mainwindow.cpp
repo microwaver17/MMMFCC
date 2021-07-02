@@ -3,6 +3,7 @@
 #include "log.h"
 #include "settings.h"
 #include "status.h"
+#include "consts.h"
 
 #include <QAudioDeviceInfo>
 #include <QFileDialog>
@@ -16,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    setWindowTitle(Consts::appTitle);
     ui->graphScalelSlider->setValue(SETTINGS.default_scale * 1000);
     ui->autoScalecheckBox->setChecked(SETTINGS.isAutoScale);
 
