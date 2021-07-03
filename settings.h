@@ -13,38 +13,23 @@
 #include <QVector>
 #include <QVariant>
 
+class SettingItem{
+public:
+    SettingItem();
+    SettingItem(QString key, QVariant value, QString type, QString displayName);
+
+    QString key;
+    QVariant value;
+    QString type;
+    QString displayName;
+};
+
 class Settings : QObject{
 
 public:
     static Settings &getInstance();
     QVariant getValue(QString key);
     void setValue(QString key, QVariant value);
-
-    QMap<QString, QVariant> settings = {
-        { "windowLength", windowLength },
-        { "filterNumber", filterNumber },
-        { "cepstramNumber", cepstramNumber },
-        { "maxFreq", maxFreq },
-        { "minFreq", minFreq },
-        { "fps", fps },
-        { "scale_multiple", scale_multiple },
-        { "default_scale", default_scale },
-        { "isAutoScale", isAutoScale },
-        { "movingAverageSize", movingAverageSize },
-    };
-
-    const QMap<QString, QString> settings_type = {
-        { "windowLength", "int" },
-        { "filterNumber", "int" },
-        { "cepstramNumber", "int" },
-        { "maxFreq", "int" },
-        { "minFreq", "int" },
-        { "fps", "int" },
-        { "scale_multiple", "double" },
-        { "default_scale", "double" },
-        { "isAutoScale", "bool" },
-        { "movingAverageSize", "int" },
-    };
 
 private:
     Settings();
@@ -54,6 +39,19 @@ private:
     }
     void save();
     void load();
+
+    QMap<QString, SettingItem> settings = {
+        { "windowLength",       SettingItem("windowLength", windowLength, "int", "windowLength") },
+        { "filterNumber",       SettingItem("filterNumber", filterNumber, "int", "filterNumber") },
+        { "cepstramNumber",     SettingItem("cepstramNumber", cepstramNumber, "int", "cepstramNumber") },
+        { "maxFreq",            SettingItem("maxFreq", maxFreq, "int", "maxFreq") },
+        { "minFreq",            SettingItem("minFreq", minFreq, "int", "minFreq") },
+        { "fps",                SettingItem("fps", fps, "int", "fps") },
+        { "scale_multiple",     SettingItem("scale_multiple", scale_multiple, "double", "scale_multiple") },
+        { "default_scale",      SettingItem("default_scale", default_scale, "double", "default_scale") },
+        { "isAutoScale",        SettingItem("isAutoScale", isAutoScale, "bool", "isAutoScale") },
+        { "movingAverageSize",  SettingItem("movingAverageSize", movingAverageSize, "int", "movingAverageSize") },
+    };
 
     // MFCC
     static constexpr int windowLength = 25;
