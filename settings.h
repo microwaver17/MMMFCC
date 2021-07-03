@@ -1,10 +1,10 @@
 ﻿#ifndef SETTINGS_H
 #define SETTINGS_H
 
-#define SETTINGS_INT(key) (Settings::getInstance().getValue(key).toInt())
-#define SETTINGS_DOUBLE(key) (Settings::getInstance().getValue(key).toDouble())
-#define SETTINGS_BOOL(key) (Settings::getInstance().getValue(key).toBool())
-#define SETTINGS_SET(key, value) (Settings::getInstance().setValue(value))
+#define SETTINGS_INT(key) (Settings::getInstance().getSettingItem(key).value.toInt())
+#define SETTINGS_DOUBLE(key) (Settings::getInstance().getSettingItem(key).value.toDouble())
+#define SETTINGS_BOOL(key) (Settings::getInstance().getSettingItem(key).value.toBool())
+#define SETTINGS_SET(key, value) (Settings::getInstance().setValue(key, value))
 
 #include <QObject>
 #include <QAudioFormat>
@@ -16,10 +16,11 @@
 class SettingItem{
 public:
     SettingItem();
-    SettingItem(QString key, QVariant value, QString type, QString displayName);
+    SettingItem(QString key, QVariant defaultValue, QString type, QString displayName);
 
     QString key;
     QVariant value;
+    QVariant defaultValue;
     QString type;
     QString displayName;
 };
@@ -28,8 +29,10 @@ class Settings : QObject{
 
 public:
     static Settings &getInstance();
-    QVariant getValue(QString key);
     void setValue(QString key, QVariant value);
+    QList<QString> getKeys();
+    SettingItem getSettingItem(QString key);
+
 
 private:
     Settings();

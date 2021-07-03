@@ -18,6 +18,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     mmmfcc.cpp \
+    settingdialog.cpp \
     settings.cpp \
     status.cpp \
     translator.cpp
@@ -31,13 +32,15 @@ HEADERS += \
     log.h \
     mainwindow.h \
     mmmfcc.h \
+    settingdialog.h \
     settings.h \
     status.h \
     translator.h \
     util.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    settingdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -23,7 +23,7 @@ protected:
 private:
     Ui::MainWindow *ui;
 
-    MmMfcc mmmfcc;
+    MmMfcc *mmmfcc;
     QList<QAudioDeviceInfo> devicesInfo;
 
 public slots:
@@ -53,5 +53,6 @@ private slots:
     void on_algorithmMfccButton_clicked();
     void on_algorithmFftButton_clicked();
     void on_seekbarSlider_valueChanged(int value);
+    void on_settingButton_clicked();
 };
 #endif // MAINWINDOW_H

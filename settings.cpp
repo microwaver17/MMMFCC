@@ -5,17 +5,23 @@
 #include <stdexcept>
 #include <QMessageBox>
 
-SettingItem::SettingItem()
+SettingItem::SettingItem() :
+    key("")
+  , value(QVariant())
+  , defaultValue("")
+  , type("")
+  , displayName("未定義")
 {
 
 }
 
-SettingItem::SettingItem(QString key, QVariant value, QString type, QString displayName)
+SettingItem::SettingItem(QString key, QVariant defaultValue, QString type, QString displayName) :
+    key(key)
+  , value(defaultValue)
+  , defaultValue(value)
+  , type(type)
+  , displayName(displayName)
 {
-    this->key = key;
-    this->value = value;
-    this->type = type;
-    this->displayName = displayName;
 }
 
 Settings::Settings()
@@ -55,7 +61,7 @@ void Settings::save()
 
     auto keys = settings.keys();
     for (auto key = keys.begin(); key != keys.end(); key++ ){
-        ini.setValue(*key, getValue(*key));
+        ini.setValue(*key, getSettingItem(*key).value);
     }
     ini.sync();
 }
@@ -65,14 +71,19 @@ void error(QString msg){
     throw std::runtime_error(msg.toStdString());
 }
 
-QVariant Settings::getValue(QString key)
+QList<QString> Settings::getKeys()
+{
+    return settings.keys();
+}
+
+SettingItem Settings::getSettingItem(QString key)
 {
     if (!settings.contains(key)){
-        error(QString(u8"存在しない項目を取得しようとしました [%1]").arg(key));
-        return QVariant();
+        error(QString(u8"存在しない項目（値）を取得しようとしました [%1]").arg(key));
+        return SettingItem();
     }
 
-    return settings[key].value;
+    return settings[key];
 }
 
 void Settings::setValue(QString key, QVariant value)

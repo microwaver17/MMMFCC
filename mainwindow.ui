@@ -663,6 +663,13 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QPushButton" name="settingButton">
+        <property name="text">
+         <string>設定</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
