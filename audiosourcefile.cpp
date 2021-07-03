@@ -1,6 +1,7 @@
 ﻿#include "audiosourcefile.h"
 #include "log.h"
 #include "status.h"
+#include "consts.h"
 
 #include <QFile>
 #include <QDataStream>
@@ -8,17 +9,17 @@
 #include "settings.h"
 
 AudioSourceFile::AudioSourceFile(QObject *parent) : QObject(parent)
-  , format(SETTINGS.getFormat())
+  , format(Consts::getFormat())
   , bufferReady(false)
 {
     decoder.setAudioFormat(format);
-    decoder.setNotifyInterval(SETTINGS.windowLength);
+    decoder.setNotifyInterval(SETTINGS_INT("windowLength"));
 
     connect(&decoder,&QAudioDecoder::bufferReady, this, &AudioSourceFile::readDecodedAudioBuffer);
     connect(&decoder, QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), this, &AudioSourceFile::notifyDecodeError);
     connect(&decoder,&QAudioDecoder::finished, this, &AudioSourceFile::finalizeDecode);
 
-    player.setNotifyInterval(SETTINGS.playerTimeUnit);
+    player.setNotifyInterval(Consts::playerTimeUnit);
     connect(&player, &QMediaPlayer::stateChanged, this, &AudioSourceFile::playAgain);
 
     Status::getInstance().setState(Status::Subject::PlayerReady, false);
@@ -31,7 +32,7 @@ QVector<qint16> AudioSourceFile::getRawSamples(int fromSamples)
         return QVector<qint16>();
     }
 
-    return rawSamples.mid(fromSamples, SETTINGS.windowLength * SETTINGS.sampleRate);
+    return rawSamples.mid(fromSamples, SETTINGS_INT("windowLength") * Consts::sampleRate);
 }
 
 QMediaPlayer &AudioSourceFile::getPlayer()

@@ -12,6 +12,7 @@ SOURCES += \
     audiosourcedevice.cpp \
     audiosourcefile.cpp \
     compute-mfcc/mfcc.cc \
+    consts.cpp \
     graph.cpp \
     log.cpp \
     main.cpp \

@@ -2,61 +2,73 @@
 
 #include <QSettings>
 #include <QFileInfo>
+#include <stdexcept>
+#include <QMessageBox>
 
-Settings::Settings(){
+Settings::Settings()
+{
     load();
     save();
 }
 
-void Settings::load(){
+Settings &Settings::getInstance()
+{
+    static Settings settings;
+
+    return settings;
+}
+
+void Settings::load()
+{
     QString path = getSettingsPsth();
     if (QFileInfo::exists(path) == false){
         return;
     }
     QSettings ini(path, QSettings::IniFormat);
 
-    windowLength = ini.value("windowLength", windowLength).toInt();
-    cepstramNumber = ini.value("cepstramNumber", cepstramNumber).toInt();
-    fps = ini.value("fps", fps).toInt();
-    scale_multiple = ini.value("scale_multiple", scale_multiple).toDouble();
-    default_scale = ini.value("default_scale", default_scale).toDouble();
-    isAutoScale = ini.value("isAutoScale", isAutoScale).toBool();
-    movingAverageSize = ini.value("movingAverageSize", movingAverageSize).toInt();
-    filterNumber = ini.value("filterNumber", filterNumber).toInt();
-    playerTimeUnit = ini.value("playerTimeUnit", playerTimeUnit).toInt();
+    auto keys = settings.keys();
+    for (auto key = keys.begin(); key != keys.end(); key++ ){
+        QVariant value = ini.value(*key);
+        if (value.isValid()){
+            settings[*key] = QVariant(value);
+        }
+    }
 }
 
-void Settings::save(){
+void Settings::save()
+{
     QString path = getSettingsPsth();
     QSettings ini(path, QSettings::IniFormat);
 
-    ini.setValue("windowLength", windowLength);
-    ini.setValue("cepstramNumber", cepstramNumber);
-    ini.setValue("fps", fps);
-    ini.setValue("scale_multiple", scale_multiple);
-    ini.setValue("default_scale", default_scale);
-    ini.setValue("isAutoScale", isAutoScale);
-    ini.setValue("movingAverageSize", movingAverageSize);
-    ini.setValue("filterNumber", filterNumber);
-    ini.setValue("playerTimeUnit", playerTimeUnit);
+    auto keys = settings.keys();
+    for (auto key = keys.begin(); key != keys.end(); key++ ){
+        ini.setValue(*key, settings[*key]);
+    }
     ini.sync();
 }
 
-Settings &Settings::getInstance(){
-    static Settings settings;
-
-    return settings;
+void error(QString msg){
+    QMessageBox::warning(nullptr, "Settings", msg);
+    throw std::runtime_error(msg.toStdString());
 }
 
-QAudioFormat Settings::getFormat()
+QVariant Settings::getValue(QString key)
 {
-    QAudioFormat format;
-    format.setCodec(codec);
-    format.setSampleRate(sampleRate);
-    format.setChannelCount(channels);
-    format.setSampleSize(sampleSize);
-    format.setSampleType(sampleType);
-    format.setByteOrder(sampleEndian);
+    if (!settings.contains(key)){
+        error("invalid setting key [" + key + "]");
+    }
 
-    return format;
+    return settings[key];
 }
+
+void Settings::setValue(QString key, QVariant value)
+{
+    if (!settings.contains(key)){
+        error("[setting] invalid key [" + key + "]");
+    }
+    if (settings_type[key] != value.typeName()){
+        error("[setting] wrong type [" + QString(value.typeName()) + "]");
+    }
+    settings[key] = value;
+}
+

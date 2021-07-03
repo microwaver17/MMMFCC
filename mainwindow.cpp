@@ -18,8 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setWindowTitle(Consts::appTitle);
-    ui->graphScalelSlider->setValue(SETTINGS.default_scale * 1000);
-    ui->autoScalecheckBox->setChecked(SETTINGS.isAutoScale);
+    ui->graphScalelSlider->setValue(SETTINGS_DOUBLE("default_scale") * 1000);
+    ui->autoScalecheckBox->setChecked(SETTINGS_BOOL("isAutoScale"));
 
     mmmfcc.getGraph().setSceneSize(ui->graphGraphicsView->width(), ui->graphGraphicsView->height());
 
@@ -167,7 +167,7 @@ void MainWindow::on_seekbarSlider_valueChanged(int value)
 {
     QMediaPlayer &player = mmmfcc.getPlayer();
     int position = (float)ui->seekbarSlider->value() / ui->seekbarSlider->maximum() * player.duration();
-    if (abs(position - player.position()) <= SETTINGS.playerTimeUnit){
+    if (abs(position - player.position()) <= Consts::playerTimeUnit){
         return;
     }
     player.setPosition(position);

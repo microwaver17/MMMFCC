@@ -1,6 +1,7 @@
 ﻿#include "audiosourcedevice.h"
 #include "settings.h"
 #include "log.h"
+#include "consts.h"
 
 #include <QAudioFormat>
 #include <QAudioDeviceInfo>
@@ -9,7 +10,7 @@
 
 AudioSourceDevice::AudioSourceDevice(QObject *parent) : QObject(parent)
   , audioInput(nullptr)
-  , format(SETTINGS.getFormat())
+  , format(Consts::getFormat())
 {
 }
 
@@ -25,7 +26,7 @@ QVector<qint16> AudioSourceDevice::getRawSamples(int fromSamples)
         return QVector<qint16>();
     }
 
-    return rawSamples.mid(fromSamples, SETTINGS.windowLength * SETTINGS.sampleRate);
+    return rawSamples.mid(fromSamples, SETTINGS_INT("windowLength") * Consts::sampleRate);
 }
 
 void AudioSourceDevice::setSource(QAudioDeviceInfo info)
@@ -43,7 +44,7 @@ void AudioSourceDevice::setSource(QAudioDeviceInfo info)
 
     delete audioInput;
     audioInput = new QAudioInput(info, format, this);
-    audioInput->setNotifyInterval(SETTINGS.windowLength);
+    audioInput->setNotifyInterval(SETTINGS_INT("windowLength"));
     audioDevice = audioInput->start();
     connect(audioInput, &QAudioInput::notify, this, &AudioSourceDevice::readAudioBuffer);
 

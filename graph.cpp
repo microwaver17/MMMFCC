@@ -14,9 +14,9 @@ Graph::Graph(QObject *parent) : QObject(parent)
   , height(0)
   , real_width(0)
   , real_height(0)
-  , scale(SETTINGS.default_scale * SETTINGS.scale_multiple)
+  , scale(SETTINGS_DOUBLE("default_scale") * SETTINGS_DOUBLE("scale_multiple"))
   , scene(nullptr)
-  , currentHistory(SETTINGS.movingAverageSize)
+  , currentHistory(SETTINGS_INT("movingAverageSize"))
   , movavg_cursor(0)
   , isHideCurrentGraph(false)
   , isAutoScele(true)
@@ -47,7 +47,7 @@ QGraphicsScene *Graph::getScene()
 
 void Graph::setScale(double scale)
 {
-    this->scale = scale * SETTINGS.scale_multiple;
+    this->scale = scale * SETTINGS_DOUBLE("scale_multiple");
 }
 
 bool Graph::getIsHideCurrentGraph() const
@@ -246,7 +246,7 @@ void Graph::paint()
     double err_freeze2 = error(n_current, n_freeze2);
 
     // FFTモードのときは線などを書かない
-    if (current.size() <= SETTINGS.cepstramNumber){
+    if (current.size() <= SETTINGS_INT("cepstramNumber")){
         paintGrid(n_current.size(), gridPen);
         paintLabel(n_current.size(), labelFont);
         paintError(err_freeze1, 0, freeze1Pen.brush(), labelFont);
