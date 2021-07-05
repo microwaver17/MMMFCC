@@ -36,6 +36,9 @@ private:
     AudioSourceDevice &audioSourceDevice;
     Source currentSource;
     Algorithm currentAlgorithm;
+    int filterNumber;
+    int maxFreq;
+    int windowLength;
 
     QVector<double> translate(QVector<qint16> &samples, quint64 from);
 

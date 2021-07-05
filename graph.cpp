@@ -14,12 +14,12 @@ Graph::Graph(QObject *parent) : QObject(parent)
   , height(0)
   , real_width(0)
   , real_height(0)
-  , scale(SETTINGS_DOUBLE("default_scale") * SETTINGS_DOUBLE("scale_multiple"))
+  , scale(SETTINGS_DOUBLE(SettingKeys::default_scale) * SETTINGS_DOUBLE(SettingKeys::scale_multiple))
   , scene(nullptr)
-  , currentHistory(SETTINGS_INT("movingAverageSize"))
+  , currentHistory(SETTINGS_INT(SettingKeys::movingAverageSize))
   , movavg_cursor(0)
   , isHideCurrentGraph(false)
-  , isAutoScele(true)
+  , isAutoScele(SETTINGS_BOOL(SettingKeys::isAutoScale))
   , isMovingAvarage(true)
   , isZeroLineAtMiddle(true)
   , graphType(GraphType::Line)
@@ -47,7 +47,7 @@ QGraphicsScene *Graph::getScene()
 
 void Graph::setScale(double scale)
 {
-    this->scale = scale * SETTINGS_DOUBLE("scale_multiple");
+    this->scale = scale * SETTINGS_DOUBLE(SettingKeys::scale_multiple);
 }
 
 bool Graph::getIsHideCurrentGraph() const
@@ -246,7 +246,8 @@ void Graph::paint()
     double err_freeze2 = error(n_current, n_freeze2);
 
     // FFTモードのときは線などを書かない
-    if (current.size() <= SETTINGS_INT("cepstramNumber")){
+    //if (current.size() <= SETTINGS_INT(SettingKeys::cepstramNumber) + 1){
+    if (Status::getInstance().getState(Status::Subject::Algorithm) == Status::State::Primary){
         paintGrid(n_current.size(), gridPen);
         paintLabel(n_current.size(), labelFont);
         paintError(err_freeze1, 0, freeze1Pen.brush(), labelFont);

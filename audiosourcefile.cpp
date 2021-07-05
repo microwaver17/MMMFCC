@@ -13,7 +13,7 @@ AudioSourceFile::AudioSourceFile(QObject *parent) : QObject(parent)
   , bufferReady(false)
 {
     decoder.setAudioFormat(format);
-    decoder.setNotifyInterval(SETTINGS_INT("windowLength"));
+    decoder.setNotifyInterval(SETTINGS_INT(SettingKeys::windowLength));
 
     connect(&decoder,&QAudioDecoder::bufferReady, this, &AudioSourceFile::readDecodedAudioBuffer);
     connect(&decoder, QOverload<QAudioDecoder::Error>::of(&QAudioDecoder::error), this, &AudioSourceFile::notifyDecodeError);
@@ -32,7 +32,7 @@ QVector<qint16> AudioSourceFile::getRawSamples(int fromSamples)
         return QVector<qint16>();
     }
 
-    return rawSamples.mid(fromSamples, SETTINGS_INT("windowLength") * Consts::sampleRate);
+    return rawSamples.mid(fromSamples, SETTINGS_INT(SettingKeys::windowLength) * Consts::sampleRate);
 }
 
 QMediaPlayer &AudioSourceFile::getPlayer()

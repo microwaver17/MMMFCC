@@ -11,19 +11,23 @@
 #include <QtDebug>
 #include <QScrollBar>
 
+void MainWindow::initMmmfcc(){
+    mmmfcc = new MmMfcc(this);
+    connect(&mmmfcc->getPlayer(), &QMediaPlayer::positionChanged, this, &MainWindow::updateSeekbar);
+    connect(&mmmfcc->getGraph(), &Graph::updated, this, &MainWindow::updateScene);
+
+    ui->graphScalelSlider->setValue(SETTINGS_DOUBLE(SettingKeys::default_scale) * ui->graphScalelSlider->maximum());
+    ui->autoScalecheckBox->setChecked(SETTINGS_BOOL(SettingKeys::isAutoScale));
+
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    mmmfcc = new MmMfcc(this);
-    connect(&mmmfcc->getPlayer(), &QMediaPlayer::positionChanged, this, &MainWindow::updateSeekbar);
-    connect(&mmmfcc->getGraph(), &Graph::updated, this, &MainWindow::updateScene);
-
-    setWindowTitle(Consts::appTitle);
-    ui->graphScalelSlider->setValue(SETTINGS_DOUBLE("default_scale") * 1000);
-    ui->autoScalecheckBox->setChecked(SETTINGS_BOOL("isAutoScale"));
+    initMmmfcc();
 
     connect(&LOG, &Log::logAdded, this, &MainWindow::updateLog);
     connect(&Status::getInstance(), &Status::statusUpdated, this, &MainWindow::updateStatus);
@@ -73,7 +77,7 @@ inline void setHighlightButtonOne(QPushButton *button, bool state){
         return;
     }
 
-    QString color = QColor(220, 220, 250).name();
+    QString color = QColor(193, 206, 232).name();
 
     if (state){
         button->setStyleSheet(QString("QWidget {background-color: %1; font-weight: bold;}").arg(color));
@@ -239,11 +243,8 @@ void MainWindow::on_graphScalelSlider_valueChanged(int value)
 
 void MainWindow::on_autoScalecheckBox_stateChanged(int state)
 {
-    if (state == Qt::CheckState::Checked){
-        mmmfcc->getGraph().setIsAutoScele(true);
-    }else{
-        mmmfcc->getGraph().setIsAutoScele(false);
-    }
+    mmmfcc->getGraph().setIsAutoScele(state == Qt::CheckState::Checked);
+    SETTINGS_SET("isAutoScale", state == Qt::CheckState::Checked);
 }
 
 void MainWindow::on_graphTypeLineButton_clicked()
@@ -289,10 +290,11 @@ void MainWindow::on_settingButton_clicked()
     }
 
     delete mmmfcc;
-    mmmfcc = new MmMfcc(this);
-    connect(&mmmfcc->getPlayer(), &QMediaPlayer::positionChanged, this, &MainWindow::updateSeekbar);
-    connect(&mmmfcc->getGraph(), &Graph::updated, this, &MainWindow::updateScene);
+
+    initMmmfcc();
 
     on_inputDeviceComboBox_currentIndexChanged(0);
+
+    Settings::getInstance().save();
 }
 

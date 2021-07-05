@@ -9,8 +9,6 @@ private:
     Consts();
 
 public:
-    static constexpr char appTitle[] = "MMMFCC - Realtime MFCC Analyzer";;
-
     // デコード形式
     static constexpr char codec[] = "audio/pcm";
     static constexpr int sampleRate = 48000;

@@ -5,23 +5,36 @@
 #include <stdexcept>
 #include <QMessageBox>
 
-SettingItem::SettingItem() :
-    key("")
-  , value(QVariant())
-  , defaultValue("")
-  , type("")
-  , displayName("未定義")
-{
+int SettingItem::itemCount = 0;
 
-}
-
-SettingItem::SettingItem(QString key, QVariant defaultValue, QString type, QString displayName) :
-    key(key)
-  , value(defaultValue)
-  , defaultValue(value)
+SettingItem::SettingItem(QString key, QVariant value, QVariant defaultValue, QString type, QString displayName) :
+   key(key)
+  , value(value)
+  , defaultValue(defaultValue)
   , type(type)
   , displayName(displayName)
+  , order(itemCount++)
 {
+    if (!value.isValid()){
+        value = defaultValue;
+    }
+}
+
+bool operator<(const SettingItem &item1, const SettingItem &item2)
+{
+    return item1.order < item2.order;
+}
+bool operator<=(const SettingItem &item1, const SettingItem &item2)
+{
+    return item1.order <= item2.order;
+}
+bool operator>(const SettingItem &item1, const SettingItem &item2)
+{
+    return item1.order > item2.order;
+}
+bool operator>=(const SettingItem &item1, const SettingItem &item2)
+{
+    return item1.order >= item2.order;
 }
 
 Settings::Settings()
@@ -68,7 +81,6 @@ void Settings::save()
 
 void error(QString msg){
     QMessageBox::warning(nullptr, "設定エラー", msg);
-    throw std::runtime_error(msg.toStdString());
 }
 
 QList<QString> Settings::getKeys()
@@ -102,7 +114,7 @@ void Settings::setValue(QString key, QVariant value)
     }else if (type == "bool"){
         newValue = value.toBool();
     }else{
-        error(QString(u8"未対応の型の値を設定しようとしました %1 [%2]").arg(type, key));
+        error(QString(u8"未対応の型を使用しようとしました %1 [%2]").arg(type, key));
         return;
     }
 

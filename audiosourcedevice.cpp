@@ -26,7 +26,7 @@ QVector<qint16> AudioSourceDevice::getRawSamples(int fromSamples)
         return QVector<qint16>();
     }
 
-    return rawSamples.mid(fromSamples, SETTINGS_INT("windowLength") * Consts::sampleRate);
+    return rawSamples.mid(fromSamples, SETTINGS_INT(SettingKeys::windowLength) * Consts::sampleRate);
 }
 
 void AudioSourceDevice::setSource(QAudioDeviceInfo info)
@@ -44,7 +44,7 @@ void AudioSourceDevice::setSource(QAudioDeviceInfo info)
 
     delete audioInput;
     audioInput = new QAudioInput(info, format, this);
-    audioInput->setNotifyInterval(SETTINGS_INT("windowLength"));
+    audioInput->setNotifyInterval(SETTINGS_INT(SettingKeys::windowLength));
     audioDevice = audioInput->start();
     connect(audioInput, &QAudioInput::notify, this, &AudioSourceDevice::readAudioBuffer);
 

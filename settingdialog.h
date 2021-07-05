@@ -1,6 +1,8 @@
 ﻿#ifndef SETTINGDIALOG_H
 #define SETTINGDIALOG_H
 
+#include "settings.h"
+
 #include <QDialog>
 
 namespace Ui {
@@ -24,6 +26,8 @@ private slots:
 
 private:
     Ui::SettingDialog *ui;
+
+    QList<SettingItem> itemList;
 };
 
 #endif // SETTINGDIALOG_H

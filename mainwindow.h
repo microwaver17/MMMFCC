@@ -26,6 +26,8 @@ private:
     MmMfcc *mmmfcc;
     QList<QAudioDeviceInfo> devicesInfo;
 
+    void initMmmfcc();
+
 public slots:
     void updateScene();
     void updateStatus();

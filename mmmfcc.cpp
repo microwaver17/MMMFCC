@@ -22,7 +22,7 @@ MmMfcc::MmMfcc(QObject *parent) : QObject(parent)
     // 計算は別スレッド
     translator.moveToThread(&translatorThread);
     translatorThread.start();
-    translatorTimer.start(1000.0 / SETTINGS_INT("fps"));
+    translatorTimer.start(1000.0 / SETTINGS_INT(SettingKeys::fps));
     LOG.addLog(u8"スレッド開始", this);
 }
 
