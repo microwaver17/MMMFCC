@@ -2,61 +2,121 @@
 
 #include <QSettings>
 #include <QFileInfo>
+#include <stdexcept>
+#include <QMessageBox>
 
-Settings::Settings(){
+int SettingItem::itemCount = 0;
+
+SettingItem::SettingItem(QString key, QVariant value, QVariant defaultValue, QString type, QString displayName) :
+   key(key)
+  , value(value)
+  , defaultValue(defaultValue)
+  , type(type)
+  , displayName(displayName)
+  , order(itemCount++)
+{
+    if (!value.isValid()){
+        value = defaultValue;
+    }
+}
+
+bool operator<(const SettingItem &item1, const SettingItem &item2)
+{
+    return item1.order < item2.order;
+}
+bool operator<=(const SettingItem &item1, const SettingItem &item2)
+{
+    return item1.order <= item2.order;
+}
+bool operator>(const SettingItem &item1, const SettingItem &item2)
+{
+    return item1.order > item2.order;
+}
+bool operator>=(const SettingItem &item1, const SettingItem &item2)
+{
+    return item1.order >= item2.order;
+}
+
+Settings::Settings()
+{
     load();
     save();
 }
 
-void Settings::load(){
+Settings &Settings::getInstance()
+{
+    static Settings settings;
+
+    return settings;
+}
+
+void Settings::load()
+{
     QString path = getSettingsPsth();
     if (QFileInfo::exists(path) == false){
         return;
     }
     QSettings ini(path, QSettings::IniFormat);
 
-    windowLength = ini.value("windowLength", windowLength).toInt();
-    cepstramNumber = ini.value("cepstramNumber", cepstramNumber).toInt();
-    fps = ini.value("fps", fps).toInt();
-    scale_multiple = ini.value("scale_multiple", scale_multiple).toDouble();
-    default_scale = ini.value("default_scale", default_scale).toDouble();
-    isAutoScale = ini.value("isAutoScale", isAutoScale).toBool();
-    movingAverageSize = ini.value("movingAverageSize", movingAverageSize).toInt();
-    filterNumber = ini.value("filterNumber", filterNumber).toInt();
-    playerTimeUnit = ini.value("playerTimeUnit", playerTimeUnit).toInt();
+    auto keys = settings.keys();
+    for (auto key = keys.begin(); key != keys.end(); key++ ){
+        QVariant value = ini.value(*key);
+        if (value.isValid()){
+            setValue(*key, value);
+        }
+    }
 }
 
-void Settings::save(){
+void Settings::save()
+{
     QString path = getSettingsPsth();
     QSettings ini(path, QSettings::IniFormat);
 
-    ini.setValue("windowLength", windowLength);
-    ini.setValue("cepstramNumber", cepstramNumber);
-    ini.setValue("fps", fps);
-    ini.setValue("scale_multiple", scale_multiple);
-    ini.setValue("default_scale", default_scale);
-    ini.setValue("isAutoScale", isAutoScale);
-    ini.setValue("movingAverageSize", movingAverageSize);
-    ini.setValue("filterNumber", filterNumber);
-    ini.setValue("playerTimeUnit", playerTimeUnit);
+    auto keys = settings.keys();
+    for (auto key = keys.begin(); key != keys.end(); key++ ){
+        ini.setValue(*key, getSettingItem(*key).value);
+    }
     ini.sync();
 }
 
-Settings &Settings::getInstance(){
-    static Settings settings;
-
-    return settings;
+void error(QString msg){
+    QMessageBox::warning(nullptr, "設定エラー", msg);
 }
 
-QAudioFormat Settings::getFormat()
+QList<QString> Settings::getKeys()
 {
-    QAudioFormat format;
-    format.setCodec(codec);
-    format.setSampleRate(sampleRate);
-    format.setChannelCount(channels);
-    format.setSampleSize(sampleSize);
-    format.setSampleType(sampleType);
-    format.setByteOrder(sampleEndian);
+    return settings.keys();
+}
 
-    return format;
+SettingItem Settings::getSettingItem(QString key)
+{
+    if (!settings.contains(key)){
+        error(QString(u8"存在しない項目（値）を取得しようとしました [%1]").arg(key));
+        return SettingItem();
+    }
+
+    return settings[key];
+}
+
+void Settings::setValue(QString key, QVariant value)
+{
+    if (!settings.contains(key)){
+        error(QString(u8"存在しない項目に設定しようとしました [%1]").arg(key));
+        return;
+    }
+
+    QString type = settings[key].type;
+    QVariant newValue;
+    if (type == "int"){
+        newValue = value.toInt();
+    }else if (type == "double"){
+        newValue = value.toDouble();
+    }else if (type == "bool"){
+        newValue = value.toBool();
+    }else{
+        error(QString(u8"未対応の型を使用しようとしました %1 [%2]").arg(type, key));
+        return;
+    }
+
+    settings[key].value = newValue;
 }

@@ -3,6 +3,7 @@
 #include "log.h"
 #include "util.h"
 #include "status.h"
+#include "consts.h"
 
 #include <QVector>
 #include <QDateTime>
@@ -11,11 +12,14 @@
 #include <QtDebug>
 
 Translator::Translator(AudioSourceFile &asf, AudioSourceDevice &asd, QObject *parent) : QObject(parent)
-  , mfccTranslator(new MFCC(SETTINGS.sampleRate, SETTINGS.cepstramNumber, SETTINGS.windowLength, 10, SETTINGS.filterNumber, SETTINGS.minFreq, SETTINGS.maxFreq))
+  , mfccTranslator(new MFCC(Consts::sampleRate, SETTINGS_INT(SettingKeys::cepstramNumber), SETTINGS_INT(SettingKeys::windowLength), 10, SETTINGS_INT(SettingKeys::filterNumber), SETTINGS_INT(SettingKeys::minFreq), SETTINGS_INT(SettingKeys::maxFreq)))
   , audioSourceFile(asf)
   , audioSourceDevice(asd)
   , currentSource(Source::Device)
   , currentAlgorithm(Algorithm::MFCC)
+  , filterNumber(SETTINGS_INT(SettingKeys::filterNumber))
+  , maxFreq(SETTINGS_INT(SettingKeys::maxFreq))
+  , windowLength(SETTINGS_INT(SettingKeys::windowLength))
 {
     Status::getInstance().setState(Status::Subject::Algorithm, Status::State::Primary);
 }
@@ -37,16 +41,16 @@ QVector<double> Translator::translate(QVector<qint16> &samples, quint64 fromSamp
     std::vector<double> data;
     if (currentAlgorithm == Algorithm::MFCC){
         data = mfccTranslator->getMfcc();
-        data.assign(data.begin(), data.begin() + SETTINGS.filterNumber);
 
     }else if (currentAlgorithm == Algorithm::FFT){
         data = mfccTranslator->getpowerSpectralCoef();
 
         // FFTの最大周波数をMFCCにかける最大周波数と合わせる
-        int maxcoef = (double)SETTINGS.maxFreq / (SETTINGS.sampleRate / 2) * mfccTranslator->getNumFFTBins();
+        int maxcoef = (double)maxFreq / (Consts::sampleRate / 2.0) * mfccTranslator->getNumFFTBins();
         data.assign(data.begin(), data.begin() + maxcoef);
         for (auto coef = data.begin(); coef != data.end(); coef++){
-            *coef = *coef / ((SETTINGS.windowLength / 1000.0) * SETTINGS.sampleRate) / pow(2, SETTINGS.sampleSize);
+            // 0.0 - 1.0 の範囲にする
+            *coef = *coef / ((windowLength / 1000.0) * Consts::sampleRate) / pow(2, Consts::sampleSize);
             *coef = sqrt(*coef);
         }
     }
@@ -64,7 +68,7 @@ void Translator::doTranslate()
                 emit updated(QVector<double>());
                 return;
             }
-            int from = audioSourceFile.getPlayer().position() / 1000.0 * SETTINGS.sampleRate;
+            int from = audioSourceFile.getPlayer().position() / 1000.0 * Consts::sampleRate;
             rawSamples = audioSourceFile.getRawSamples(from);
         }
         QVector<double> data = translate(rawSamples, 0);

@@ -28,6 +28,9 @@
     <height>16777215</height>
    </size>
   </property>
+  <property name="windowTitle">
+   <string>MMMFCC - Realtime MFCC Analyzer</string>
+  </property>
   <widget class="QWidget" name="rootLayout">
    <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,0">
     <item>
@@ -662,6 +665,13 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="settingButton">
+        <property name="text">
+         <string>設定</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
