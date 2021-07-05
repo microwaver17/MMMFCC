@@ -16,6 +16,7 @@
 class SettingItem{
 public:
     SettingItem(QString key="", QVariant value=QVariant(), QVariant defaultValue=QVariant(), QString type="", QString displayName="undefined");
+    SettingItem(const SettingItem &item);
 
     QString key;
     QVariant value;
@@ -65,18 +66,7 @@ private:
         return QCoreApplication::applicationDirPath() + "/settings.ini";
     }
 
-    QMap<QString, SettingItem> settings = {
-        { "windowLength",       SettingItem("windowLength", QVariant(), windowLength, "int", u8"[MFCC] 窓幅（ms）") },
-        { "filterNumber",       SettingItem("filterNumber", QVariant(), filterNumber, "int", u8"[MFCC] フィルタバンク数") },
-        { "cepstramNumber",     SettingItem("cepstramNumber", QVariant(), cepstramNumber, "int", u8"[MFCC] 表示する次元数") },
-        { "maxFreq",            SettingItem("maxFreq", QVariant(), maxFreq, "int", u8"[MFCC] 最大周波数（LPF）") },
-        { "minFreq",            SettingItem("minFreq", QVariant(), minFreq, "int", u8"[MFCC] 最小周波数（HPF）") },
-        { "fps",                SettingItem("fps", QVariant(), fps, "int", u8"[グラフ] 画面更新するFPS") },
-        { "scale_multiple",     SettingItem("scale_multiple", QVariant(), scale_multiple, "double", u8"[グラフ] 最大拡大率") },
-        { "default_scale",      SettingItem("default_scale", QVariant(), default_scale, "double", u8"[グラフ] デフォルト拡大率（0.0 - 1.0）") },
-        { "isAutoScale",        SettingItem("isAutoScale", QVariant(), isAutoScale, "bool", u8"[グラフ] 自動的に拡大") },
-        { "movingAverageSize",  SettingItem("movingAverageSize", QVariant(), movingAverageSize, "int", u8"[グラフ] 移動平均のサンプル数") },
-    };
+    QMap<QString, SettingItem> settings;
 
     // デフォルト値
 
